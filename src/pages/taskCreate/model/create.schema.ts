@@ -1,35 +1,51 @@
-
 import { z } from 'zod';
 
-export const taskSchema = z.object({
-    testType: z.string(),
+export const taskCreateSchema = z.object({
+  test_name: z.string().trim().min(1, 'Test Name is required'),
 
-    subject: z.string().min(1),
+  subject: z.string().trim().min(1, 'Subject is required'),
 
-    topic: z.string().min(1),
+  test_type: z.string().trim().min(1, 'Test Type is required'),
 
-    subTopic: z.string().min(1),
+  topics: z.array(z.string()).min(1, 'Select at least one topic'),
 
-    testName: z.string().min(1),
+  sub_topics: z.array(z.string()).min(1, 'Select at least one sub topic'),
 
-    duration: z.coerce.number().min(1),
+  difficulty_level: z.enum(['Easy', 'Medium', 'Difficult']),
 
-    difficulty: z.enum([
-        'easy',
-        'medium',
-        'difficult',
-    ]),
+  correct_marks: z.coerce
+    .number({
+      error: 'Correct marks is required',
+    })
+    .min(0),
 
-    wrongAnswer: z.coerce.number(),
+  wrong_marks: z.coerce.number({
+    error: 'Wrong marks is required',
+  }),
 
-    unattempted: z.coerce.number(),
+  unattempt_marks: z.coerce.number({
+    error: 'Unattempt marks is required',
+  }),
 
-    correctAnswer: z.coerce.number(),
+  total_time: z.coerce
+    .number({
+      error: 'Total time is required',
+    })
+    .min(1, 'Total time must be greater than 0'),
 
-    noOfQuestions: z.coerce.number(),
+  total_marks: z.coerce
+    .number({
+      error: 'Total marks is required',
+    })
+    .min(1, 'Total marks must be greater than 0'),
 
-    totalMarks: z.coerce.number(),
+  total_questions: z.coerce
+    .number({
+      error: 'Total questions is required',
+    })
+    .min(1, 'Total questions must be greater than 0'),
+
+  status: z.enum(['Draft', 'Published']).optional(),
 });
 
-export type TaskFormValues =
-    z.infer<typeof taskSchema>;
+export type TaskCreateFormValues = z.infer<typeof taskCreateSchema>;

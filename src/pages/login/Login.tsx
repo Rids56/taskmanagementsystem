@@ -12,8 +12,7 @@ import {
   TextField,
   Typography,
   Alert,
-  useTheme,
-  useMediaQuery,
+  Grid,
 } from '@mui/material';
 import { useAppDispatch } from '../../hooks';
 import logo from '../../assets/logo.png';
@@ -26,8 +25,6 @@ const Login: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const theme = useTheme();
-  const isSmall = useMediaQuery(theme.breakpoints.down('md'));
 
   const {
     register,
@@ -50,7 +47,8 @@ const Login: React.FC = () => {
       const { token, user } = response.data;
 
       localStorage.setItem('token', token);
-      dispatch(setCredentials({ token, user }));
+      localStorage.setItem('user', JSON.stringify(user));
+      dispatch(setCredentials({ token, user: JSON.stringify(user) }));
 
       navigate('/dashboard');
     } catch (error) {
@@ -61,124 +59,128 @@ const Login: React.FC = () => {
   };
 
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        display: 'flex',
-        flexDirection: isSmall ? 'column' : 'row',
-      }}
-    >
-      <Box
-        sx={{
-          flex: 1,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          p: 4,
-          bgcolor: 'background.default',
-        }}
-      >
-        <Box
-          component="img"
-          src={frame}
-          alt="Login Illustration"
-          sx={{ width: '100%', maxWidth: 540 }}
-        />
-      </Box>
+    <>
+      <Grid container>
+        <Grid size={6}>
+          {/* Left Side */}
+          <Box
+            sx={{
+              flex: 1,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Box
+              component="img"
+              src={frame}
+              alt="Login Illustration"
+              sx={{ maxHeight: '100vh' }}
+            />
+          </Box>
+        </Grid>
 
-      <Box
-        sx={{
-          flex: 1,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          p: 4,
-        }}
-      >
-        <Card
-          elevation={0}
-          sx={{
-            width: '100%',
-            maxWidth: 520,
-            border: '1px solid',
-            borderColor: 'divider',
-            borderRadius: 3,
-            bgcolor: 'background.paper',
-          }}
+        <Grid
+          size={6}
+          sx={{ padding: 2, gap: 20, display: 'flex', flexDirection: 'column' }}
         >
-          <CardContent sx={{ p: 5, pt: 4 }}>
-            <Stack spacing={4}>
-              <Box
-                component="img"
-                src={logo}
-                alt="Company Logo"
-                sx={{ width: 130, height: 'auto', mx: 'auto' }}
-              />
+          <Card
+            elevation={0}
+            sx={{
+              width: '100%',
+              height: '100%',
+              border: '1px solid',
+              borderColor: 'divider',
+              borderRadius: 2,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              bgcolor: 'background.paper',
+            }}
+          >
+            <CardContent sx={{ p: 5, pt: 4 }}>
+              <Stack spacing={4}>
+                <Box
+                  component="img"
+                  src={logo}
+                  alt="Company Logo"
+                  sx={{ width: 130, height: 'auto', mx: 'auto' }}
+                />
 
-              <Box>
-                <Typography variant="h5" sx={{ fontWeight: 700 }} gutterBottom>
-                  Login to Your Account
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Use your company provided Login credentials to access the dashboard.
-                </Typography>
-              </Box>
-
-              {errorMessage ? (
-                <Alert severity="error">{errorMessage}</Alert>
-              ) : null}
-
-              <Box component="form" onSubmit={handleSubmit(onSubmit)}>
-                <Stack spacing={3}>
-                  <TextField
-                    fullWidth
-                    label="User ID"
-                    placeholder="Enter User ID"
-                    size="small"
-                    error={!!errors.userId}
-                    helperText={errors.userId?.message}
-                    {...register('userId')}
-                  />
-
-                  <TextField
-                    fullWidth
-                    label="Password"
-                    placeholder="Enter Password"
-                    type="password"
-                    size="small"
-                    error={!!errors.password}
-                    helperText={errors.password?.message}
-                    {...register('password')}
-                  />
-
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                    }}
+                <Box>
+                  <Typography
+                    variant="h5"
+                    sx={{ fontWeight: 700 }}
+                    gutterBottom
                   >
-                    <Link href="#" underline="hover" sx={{ fontSize: 12 }}>
-                      Forgot password?
-                    </Link>
-                  </Box>
+                    Login to Your Account
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Use your company provided Login credentials to access the
+                    dashboard.
+                  </Typography>
+                </Box>
 
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    fullWidth
-                    size="large"
-                    sx={{ height: 48, borderRadius: 2, textTransform: 'none' }}
-                  >
-                    Login
-                  </Button>
-                </Stack>
-              </Box>
-            </Stack>
-          </CardContent>
-        </Card>
-      </Box>
-    </Box>
+                {errorMessage ? (
+                  <Alert severity="error">{errorMessage}</Alert>
+                ) : null}
+
+                <Box component="form" onSubmit={handleSubmit(onSubmit)}>
+                  <Stack spacing={3}>
+                    <TextField
+                      fullWidth
+                      label="User ID"
+                      placeholder="Enter User ID"
+                      size="small"
+                      error={!!errors.userId}
+                      helperText={errors.userId?.message}
+                      {...register('userId')}
+                    />
+
+                    <TextField
+                      fullWidth
+                      label="Password"
+                      placeholder="Enter Password"
+                      type="password"
+                      size="small"
+                      error={!!errors.password}
+                      helperText={errors.password?.message}
+                      {...register('password')}
+                    />
+
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                      }}
+                    >
+                      <Link href="#" underline="hover" sx={{ fontSize: 12 }}>
+                        Forgot password?
+                      </Link>
+                    </Box>
+
+                    <Button
+                      type="submit"
+                      variant="contained"
+                      fullWidth
+                      size="large"
+                      sx={{
+                        height: 48,
+                        borderRadius: 2,
+                        textTransform: 'none',
+                      }}
+                    >
+                      Login
+                    </Button>
+                  </Stack>
+                </Box>
+              </Stack>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+    </>
   );
 };
 

@@ -1,34 +1,38 @@
-import { Box, Card, Typography } from '@mui/material';
+import { Box, Breadcrumbs, Button, Typography } from '@mui/material';
+
+import AddIcon from '@mui/icons-material/Add';
+
+import TestListTable from './TestListTable';
+import { useNavigate } from 'react-router-dom';
 
 export default function Dashboard() {
-  return (
-    <>
-      <Typography variant="h4" sx={{ mb: 3 }}>
-        Dashboard
-      </Typography>
+  const navigate = useNavigate();
 
+  return (
+    <Box>
       <Box
         sx={{
-          display: 'grid',
-          gap: 24,
-          gridTemplateColumns: {
-            xs: '1fr',
-            md: 'repeat(4, minmax(0, 1fr))',
-          },
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          mb: 4,
         }}
       >
-        {[1, 2, 3, 4].map((item) => (
-          <Card
-            key={item}
-            sx={{
-              p: 3,
-            }}
-          >
-            <Typography>Total Tests</Typography>
-            <Typography variant="h4">125</Typography>
-          </Card>
-        ))}
+        <Breadcrumbs>
+          <Typography color="text.secondary">Dashboard</Typography>
+        </Breadcrumbs>
+
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => navigate('/task-create')}
+          sx={{ minWidth: 180 }}
+        >
+          Create New Test
+        </Button>
       </Box>
-    </>
+
+      <TestListTable />
+    </Box>
   );
 }

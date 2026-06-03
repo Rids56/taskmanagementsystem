@@ -69,6 +69,8 @@ const appTheme = createTheme({
     button: {
       textTransform: 'none',
       fontWeight: 600,
+      width: 160,
+      height: 48,
     },
   },
   // shape: {
