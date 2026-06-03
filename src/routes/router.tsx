@@ -1,11 +1,15 @@
-import { createBrowserRouter, Navigate, Outlet, useLocation } from 'react-router-dom';
-import Home from '../pages/Home';
-import About from '../pages/About';
+import {
+  createBrowserRouter,
+  Navigate,
+  Outlet,
+  useLocation,
+} from 'react-router-dom';
 import NotFound from '../pages/NotFound';
 import Login from '../pages/login/Login';
 import MainLayout from '../components/layout/MainLayout';
 import Dashboard from '../pages/dashboard/Dashboard';
 import TaskCreate from '../pages/taskCreate/TaskCreate';
+import AddQuestion from '../pages/addQuestion/AddQuestion';
 
 function RequireAuth() {
   const location = useLocation();
@@ -28,14 +32,6 @@ const router = createBrowserRouter([
     element: <Login />,
   },
   {
-    path: '/home',
-    element: <Home />,
-  },
-  {
-    path: '/about',
-    element: <About />,
-  },
-  {
     element: <RequireAuth />,
     children: [
       {
@@ -48,6 +44,10 @@ const router = createBrowserRouter([
           {
             path: '/task-create',
             element: <TaskCreate />,
+          },
+          {
+            path: '/add-question',
+            element: <AddQuestion />,
           },
         ],
       },

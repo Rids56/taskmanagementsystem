@@ -6,10 +6,11 @@ import {
   Grid,
   TextField,
 } from '@mui/material';
-import { Controller } from 'react-hook-form';
+import { Controller, useFormContext } from 'react-hook-form';
 import DifficultyRadio from '../../components/DifficultyRadio';
 import MarkingSchemeFields from '../../components/MarkingSchemeFields';
 import { useEffect } from 'react';
+import { TaskCreateFormValues } from './model/create.schema';
 
 const subjectOptions = [
   { id: 'physics', label: 'Physics' },
@@ -26,21 +27,6 @@ const subTopicOptions = [
   { id: 'hydrocarbon', label: 'Hydrocarbon' },
 ];
 
-const defaultValues = {
-  test_name: '',
-  subject: '',
-  test_type: 'chapter-wise',
-  topics: [] as string[],
-  sub_topics: [] as string[],
-  difficulty_level: 'Easy',
-  correct_marks: 5,
-  wrong_marks: -1,
-  unattempt_marks: 0,
-  total_time: 60,
-  total_marks: 100,
-  total_questions: 20,
-};
-
 const getOptionByValue = (
   value: string,
   options: { id: string; label: string }[]
@@ -56,36 +42,18 @@ const getOptionsByValues = (
     (option) => values.includes(option.label) || values.includes(option.id)
   );
 
-export default function TaskCreateForm({
-  row,
-  isEditMode,
-  methods,
-  onSubmit,
-}: any) {
+export default function TaskCreateForm({ row, isEditMode, onSubmit }: any) {
   const {
-    register,
     control,
     reset,
     handleSubmit,
-    formState,
     formState: { errors },
-  } = methods;
-
-  console.log('page error', errors, formState.errors);
+  } = useFormContext<TaskCreateFormValues>();
 
   useEffect(() => {
     if (row && isEditMode) {
-      console.log('In if');
-
-      reset({
-        ...defaultValues,
-        ...row,
-      });
+      reset(row);
     }
-    // else {
-    //   console.log('In else');
-    //   reset(defaultValues);
-    // }
   }, [row, isEditMode, reset]);
 
   return (
@@ -122,12 +90,18 @@ export default function TaskCreateForm({
         <Grid size={{ xs: 12, md: 6 }}>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             <FormLabel>Name of Test</FormLabel>
-            <TextField
-              fullWidth
-              placeholder="Enter name of Test"
-              error={!!errors.test_name}
-              helperText={errors.test_name?.message}
-              {...register('test_name')}
+            <Controller
+              name="test_name"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  fullWidth
+                  placeholder="Enter name of Test"
+                  error={!!errors.test_name}
+                  helperText={errors.test_name?.message}
+                  {...field}
+                />
+              )}
             />
           </Box>
         </Grid>
@@ -221,7 +195,10 @@ export default function TaskCreateForm({
               control={control}
               render={({ field }) => (
                 <DifficultyRadio
-                  {...field}
+                  value={field.value}
+                  name={field.name}
+                  onChange={(_, value) => field.onChange(value)}
+                  onBlur={field.onBlur}
                   error={!!errors.difficulty_level}
                   helperText={errors.difficulty_level?.message}
                 />
@@ -231,7 +208,7 @@ export default function TaskCreateForm({
         </Grid>
 
         <Grid size={12}>
-          <MarkingSchemeFields register={register} errors={errors} />
+          <MarkingSchemeFields />
         </Grid>
 
         <Grid size={12}>

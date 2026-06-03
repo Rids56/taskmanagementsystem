@@ -48,7 +48,7 @@ const Login: React.FC = () => {
 
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
-      dispatch(setCredentials({ token, user: JSON.stringify(user) }));
+      dispatch(setCredentials({ token, user: user }));
 
       navigate('/dashboard');
     } catch (error) {

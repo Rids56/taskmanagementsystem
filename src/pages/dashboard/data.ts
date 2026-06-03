@@ -15,12 +15,12 @@ export interface Test {
   topics: string[];
   sub_topics: string[];
   difficulty_level: 'Easy' | 'Medium' | 'Difficult';
-  correct_marks: unknown | number;
-  wrong_marks: undefined | number;
-  unattempt_marks: unknown | number;
-  total_time: unknown | number;
-  total_questions: unknown | number;
-  total_marks: unknown | number;
+  correct_marks: number;
+  wrong_marks: number;
+  unattempt_marks: number;
+  total_time: number;
+  total_questions: number;
+  total_marks: number;
   status: 'Draft' | 'Published';
   created_date: string;
 }

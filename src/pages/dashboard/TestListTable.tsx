@@ -84,6 +84,7 @@ export default function TestListTable() {
                     state: {
                       mode: 'edit',
                       rowData: row.original,
+                      returnTo: '/dashboard',
                     },
                   })
                 }

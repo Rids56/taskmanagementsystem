@@ -10,14 +10,18 @@ import {
 
 interface DifficultyRadioProps {
   value?: string;
+  name?: string;
   onChange?: (event: ChangeEvent<HTMLInputElement>, value: string) => void;
+  onBlur?: () => void;
   error?: boolean;
   helperText?: string;
 }
 
 export default function DifficultyRadio({
   value,
+  name,
   onChange,
+  onBlur,
   error = false,
   helperText,
 }: DifficultyRadioProps) {
@@ -27,8 +31,10 @@ export default function DifficultyRadio({
 
       <RadioGroup
         row
+        name={name}
         value={value ?? ''}
         onChange={onChange}
+        onBlur={onBlur}
         sx={{
           display: 'flex',
           justifyContent: 'space-between',

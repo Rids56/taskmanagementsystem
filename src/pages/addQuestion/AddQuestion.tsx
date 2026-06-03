@@ -11,13 +11,13 @@ import {
   AddQuestionFormValues,
 } from './model/addQuestion.schema';
 import { useLocation } from 'react-router-dom';
+import TestInfoCard from './TestInfoCard';
 
 export default function AddQuestion() {
   const [questions, setQuestions] = useState<any[]>([]);
   const location = useLocation();
 
-  const testData = location.state?.testData;
-  console.log('TEST DATA', testData);
+  const rowData = location.state?.rowData;
 
   const methods = useForm<AddQuestionFormValues>({
     resolver: zodResolver(addQuestionSchema),
@@ -50,21 +50,7 @@ export default function AddQuestion() {
         }}
       >
         {/* Test Details */}
-        <Box
-          sx={{
-            p: 3,
-            mb: 4,
-            border: 1,
-            borderColor: 'divider',
-            borderRadius: 2,
-          }}
-        >
-          <Typography variant="h6">Physics Chapter 1 Test</Typography>
-
-          <Typography color="text.secondary">Subject: Physics</Typography>
-
-          <Typography color="text.secondary">Type: Chapter Wise</Typography>
-        </Box>
+        <TestInfoCard rowData={rowData} />
 
         <AddQuestionForm methods={methods} onSubmit={onSubmit} />
 

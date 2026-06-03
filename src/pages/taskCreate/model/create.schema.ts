@@ -1,17 +1,38 @@
 import { z } from 'zod';
 
 export const taskCreateSchema = z.object({
-  test_name: z.string().trim().min(1, 'Test Name is required'),
+  test_name: z
+    .string({ error: 'Test Name is required' })
+    .trim()
+    .min(1, { message: 'Test Name is required' }),
 
-  subject: z.string().trim().min(1, 'Subject is required'),
+  subject: z
+    .string({ error: 'Subject is required' })
+    .trim()
+    .min(1, { message: 'Subject is required' }),
 
-  test_type: z.string().trim().min(1, 'Test Type is required'),
+  test_type: z
+    .string({ error: 'Test Type is required' })
+    .trim()
+    .min(1, { message: 'Test Type is required' }),
 
-  topics: z.array(z.string()).min(1, 'Select at least one topic'),
+  topics: z
+    .array(z.string())
+    .optional()
+    .refine((value) => Array.isArray(value) && value.length > 0, {
+      message: 'Please select at least one topic',
+    }),
 
-  sub_topics: z.array(z.string()).min(1, 'Select at least one sub topic'),
+  sub_topics: z
+    .array(z.string())
+    .optional()
+    .refine((value) => Array.isArray(value) && value.length > 0, {
+      message: 'Please select at least one sub-topic',
+    }),
 
-  difficulty_level: z.enum(['Easy', 'Medium', 'Difficult']),
+  difficulty_level: z.enum(['Easy', 'Medium', 'Difficult'], {
+    error: 'Difficulty Level is required',
+  }),
 
   correct_marks: z.coerce
     .number({

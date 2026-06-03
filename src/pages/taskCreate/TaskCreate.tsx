@@ -4,7 +4,7 @@ import TestTypeTabs from '../../components/TestTypeTabs';
 import TaskCreateForm from './TaskCreateForm';
 import { TaskCreateFormValues, taskCreateSchema } from './model/create.schema';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+import { FormProvider, useForm } from 'react-hook-form';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 export default function TaskCreate() {
@@ -13,24 +13,12 @@ export default function TaskCreate() {
 
   const editData = location.state?.rowData;
   const isEditMode = location.state?.mode === 'edit';
+  const returnTo = location.state?.returnTo;
 
-  const methods = useForm<TaskCreateFormValues>({
+  const methods = useForm({
     resolver: zodResolver(taskCreateSchema),
     mode: 'onSubmit',
-    defaultValues: {
-      test_name: '',
-      subject: '',
-      test_type: 'chapter-wise',
-      topics: [] as string[],
-      sub_topics: [] as string[],
-      difficulty_level: 'Easy',
-      correct_marks: 5,
-      wrong_marks: -1,
-      unattempt_marks: 0,
-      total_time: 60,
-      total_marks: 100,
-      total_questions: 20,
-    },
+    defaultValues: { test_type: 'chapter-wise' },
   });
 
   const {
@@ -38,21 +26,28 @@ export default function TaskCreate() {
     formState: { errors },
   } = methods;
 
-  console.log('page error 1', errors, formState.errors);
-
   const onSubmit = async (data: TaskCreateFormValues) => {
-    console.log('FORM DATA', data);
+    if (Object.keys(errors).length === 0) {
+      // API CALL HERE
+      console.log('FORM DATA', data);
 
-    // add test type to data
-    // data = { ...data, test_type: 'chapter-wise' };
-
-    navigate('/add-question', {
-      state: {
-        testData: data,
-      },
-    });
-
-    // API CALL HERE
+      if (isEditMode && returnTo) {
+        navigate(returnTo, {
+          state: {
+            rowData: data,
+          },
+        });
+        return;
+      } else {
+        navigate('/add-question', {
+          state: {
+            rowData: data,
+          },
+        });
+      }
+    } else {
+      console.log('Form Errors', errors, formState.errors, !errors);
+    }
   };
 
   return (
@@ -81,12 +76,14 @@ export default function TaskCreate() {
         <TestTypeTabs methods={methods} />
 
         <Box sx={{ mt: 4 }}>
-          <TaskCreateForm
-            row={editData}
-            isEditMode={isEditMode}
-            methods={methods}
-            onSubmit={onSubmit}
-          />
+          <FormProvider {...methods}>
+            <TaskCreateForm
+              row={editData}
+              isEditMode={isEditMode}
+              // methods={methods}
+              onSubmit={onSubmit}
+            />
+          </FormProvider>
         </Box>
       </Paper>
     </Box>
