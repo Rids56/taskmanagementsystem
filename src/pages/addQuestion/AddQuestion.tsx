@@ -54,7 +54,10 @@ export default function AddQuestion() {
 
         <AddQuestionForm methods={methods} onSubmit={onSubmit} />
 
-        <QuestionList questions={questions} setQuestions={setQuestions} />
+        <QuestionList
+          questions={rowData?.questions ?? questions ?? []}
+          setQuestions={setQuestions}
+        />
       </Paper>
     </Box>
   );

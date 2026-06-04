@@ -6,55 +6,167 @@ import {
   Grid,
   TextField,
 } from '@mui/material';
-import { Controller, useFormContext } from 'react-hook-form';
+import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import DifficultyRadio from '../../components/DifficultyRadio';
 import MarkingSchemeFields from '../../components/MarkingSchemeFields';
-import { useEffect } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { TaskCreateFormValues } from './model/create.schema';
+import { RootState } from '@/src/store/store';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  getSubjectsRequest,
+  // resetSubject,
+} from '../../store/slices/subjectSlice';
+import { SubjectOption, TopicOption } from '../interfaceType';
+// TOPIC //
+import { resetTopics, getTopicsRequest } from '../../store/slices/topicSlice';
+// SUB-TOPIC //
+import {
+  resetSubTopics,
+  getSubTopicsRequest,
+} from '../../store/slices/subTopicSlice';
+import { useLocation, useNavigate } from 'react-router-dom';
 
-const subjectOptions = [
-  { id: 'physics', label: 'Physics' },
-  { id: 'chemistry', label: 'Chemistry' },
-];
-
-const topicOptions = [
-  { id: 'motion', label: 'Motion' },
-  { id: 'organic', label: 'Organic' },
-];
-
-const subTopicOptions = [
-  { id: 'velocity', label: 'Velocity' },
-  { id: 'hydrocarbon', label: 'Hydrocarbon' },
-];
-
-const getOptionByValue = (
-  value: string,
-  options: { id: string; label: string }[]
-) =>
-  options.find((option) => option.id === value || option.label === value) ||
-  null;
-
-const getOptionsByValues = (
-  values: string[] = [],
-  options: { id: string; label: string }[]
-) =>
-  options.filter(
-    (option) => values.includes(option.label) || values.includes(option.id)
-  );
-
-export default function TaskCreateForm({ row, isEditMode, onSubmit }: any) {
+export default function TaskCreateForm({ isEditMode, onSubmit }: any) {
   const {
     control,
-    reset,
+    // reset,
+    // getValues,
+    setValue,
     handleSubmit,
     formState: { errors },
   } = useFormContext<TaskCreateFormValues>();
+  const dispatch = useDispatch();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const isInternalUpdate = useRef(false);
+
+  const returnTo = location.state?.returnTo;
+
+  const selectedSubject = useWatch({
+    control,
+    name: 'subject',
+  });
+  const selectedTopics = useWatch({
+    control,
+    name: 'topics',
+  });
+
+  // Selectors
+  const { data: subjects, loading: subjectLoader } = useSelector(
+    (state: RootState) => state.subjects
+  );
+  const { data: topics, loading: topicLoader } = useSelector(
+    (state: RootState) => state.topics
+  );
+  const { data: subTopics, loading: subTopicLoader } = useSelector(
+    (state: RootState) => state.subTopics
+  );
 
   useEffect(() => {
-    if (row && isEditMode) {
-      reset(row);
+    if (!subjects) dispatch(getSubjectsRequest());
+
+    return (): void => {
+      // dispatch(resetSubject());
+      // dispatch(resetTopics());
+      // dispatch(resetSubTopics());
+    };
+  }, [dispatch]);
+
+  // // // API -> TOPIC
+  // useEffect(() => {
+  //   if (!selectedSubject?.id) return;
+
+  //   const shouldResetTopics =
+  //     !selectedTopics?.length ||
+  //     selectedTopics.some((topic) => topic.subject_id !== selectedSubject.id);
+
+  //   if (shouldResetTopics) {
+  //     setValue('topics', []);
+  //     dispatch(resetTopics());
+  //   }
+
+  //   dispatch(getTopicsRequest(selectedSubject.id));
+  // }, [dispatch, selectedSubject?.id, selectedTopics, setValue]);
+  useEffect(() => {
+    if (!selectedSubject?.id) return;
+
+    dispatch(getTopicsRequest(selectedSubject.id));
+
+    if (isInternalUpdate.current) return;
+
+    if (
+      selectedTopics?.length &&
+      selectedTopics.every((t) => t.subject_id === selectedSubject.id)
+    ) {
+      return;
     }
-  }, [row, isEditMode, reset]);
+
+    isInternalUpdate.current = true;
+    setValue('topics', []);
+    dispatch(resetTopics());
+
+    setTimeout(() => {
+      isInternalUpdate.current = false;
+    }, 0);
+  }, [selectedSubject?.id]);
+
+  // // // API -> SUB-TOPIC
+  // useEffect(() => {
+  //   if (!selectedTopics?.length) {
+  //     dispatch(resetSubTopics());
+  //     setValue('sub_topics', []);
+  //     return;
+  //   }
+
+  //   dispatch(resetSubTopics());
+
+  //   selectedTopics.forEach((topic) => {
+  //     dispatch(getSubTopicsRequest(topic.id));
+  //   });
+  // }, [dispatch, selectedTopics, setValue]);
+  useEffect(() => {
+    if (!selectedTopics?.length) {
+      dispatch(resetSubTopics());
+      setValue('sub_topics', []);
+      return;
+    }
+
+    dispatch(resetSubTopics());
+
+    selectedTopics.forEach((topic) => {
+      dispatch(getSubTopicsRequest(topic.id));
+    });
+  }, [selectedTopics]);
+
+  const subjectOptions = useMemo<SubjectOption[]>(
+    () =>
+      subjects?.map((item) => ({
+        id: item.id,
+        name: item.name,
+      })) ?? [],
+    [subjects]
+  );
+
+  const topicOptions = useMemo<TopicOption[]>(
+    () =>
+      topics?.map((topic) => ({
+        id: topic.id,
+        name: topic.name,
+        subject_id: topic.subject_id,
+      })) ?? [],
+    [topics]
+  );
+
+  const subTopicOptions = useMemo<TopicOption[]>(
+    () =>
+      subTopics?.map((subtopic) => ({
+        id: subtopic.id,
+        name: subtopic.name,
+        topic_id: subtopic.topic_id,
+      })) ?? [],
+    [subTopics]
+  );
 
   return (
     <Box component="form" onSubmit={handleSubmit(onSubmit)}>
@@ -69,8 +181,12 @@ export default function TaskCreateForm({ row, isEditMode, onSubmit }: any) {
                 <Autocomplete
                   id="subject"
                   selectOnFocus
-                  value={getOptionByValue(field.value, subjectOptions)}
-                  onChange={(_, value) => field.onChange(value?.label ?? '')}
+                  loading={subjectLoader}
+                  value={field.value ?? null}
+                  onChange={(_, value) => field.onChange(value)}
+                  isOptionEqualToValue={(option, value) =>
+                    option.id === value.id
+                  }
                   renderInput={(params) => (
                     <TextField
                       {...params}
@@ -80,7 +196,7 @@ export default function TaskCreateForm({ row, isEditMode, onSubmit }: any) {
                     />
                   )}
                   options={subjectOptions}
-                  getOptionLabel={(option) => option.label}
+                  getOptionLabel={(option) => option.name}
                 />
               )}
             />
@@ -91,14 +207,14 @@ export default function TaskCreateForm({ row, isEditMode, onSubmit }: any) {
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             <FormLabel>Name of Test</FormLabel>
             <Controller
-              name="test_name"
+              name="name"
               control={control}
               render={({ field }) => (
                 <TextField
                   fullWidth
                   placeholder="Enter name of Test"
-                  error={!!errors.test_name}
-                  helperText={errors.test_name?.message}
+                  error={!!errors.name}
+                  helperText={errors.name?.message}
                   {...field}
                 />
               )}
@@ -117,9 +233,11 @@ export default function TaskCreateForm({ row, isEditMode, onSubmit }: any) {
                   id="topics"
                   selectOnFocus
                   multiple
-                  value={getOptionsByValues(field.value, topicOptions)}
-                  onChange={(_, value) =>
-                    field.onChange(value.map((option) => option.label))
+                  loading={topicLoader}
+                  value={field.value ?? []}
+                  onChange={(_, value) => field.onChange(value)}
+                  isOptionEqualToValue={(option, value) =>
+                    option.id === value.id
                   }
                   renderInput={(params) => (
                     <TextField
@@ -130,7 +248,7 @@ export default function TaskCreateForm({ row, isEditMode, onSubmit }: any) {
                     />
                   )}
                   options={topicOptions}
-                  getOptionLabel={(option) => option.label}
+                  getOptionLabel={(option) => option.name}
                 />
               )}
             />
@@ -148,9 +266,15 @@ export default function TaskCreateForm({ row, isEditMode, onSubmit }: any) {
                   id="sub_topics"
                   selectOnFocus
                   multiple
-                  value={getOptionsByValues(field.value, subTopicOptions)}
-                  onChange={(_, value) =>
-                    field.onChange(value.map((option) => option.label))
+                  // value={getOptionsByValues(field.value, subTopicOptions)}
+                  // onChange={(_, value) =>
+                  //   field.onChange(value.map((option) => option.name))
+                  // }
+                  loading={subTopicLoader}
+                  value={field.value ?? []}
+                  onChange={(_, value) => field.onChange(value)}
+                  isOptionEqualToValue={(option, value) =>
+                    option.id === value.id
                   }
                   renderInput={(params) => (
                     <TextField
@@ -161,7 +285,7 @@ export default function TaskCreateForm({ row, isEditMode, onSubmit }: any) {
                     />
                   )}
                   options={subTopicOptions}
-                  getOptionLabel={(option) => option.label}
+                  getOptionLabel={(option) => option.name}
                 />
               )}
             />
@@ -191,7 +315,7 @@ export default function TaskCreateForm({ row, isEditMode, onSubmit }: any) {
         <Grid size={{ xs: 12, md: 6 }}>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
             <Controller
-              name="difficulty_level"
+              name="difficulty"
               control={control}
               render={({ field }) => (
                 <DifficultyRadio
@@ -199,8 +323,8 @@ export default function TaskCreateForm({ row, isEditMode, onSubmit }: any) {
                   name={field.name}
                   onChange={(_, value) => field.onChange(value)}
                   onBlur={field.onBlur}
-                  error={!!errors.difficulty_level}
-                  helperText={errors.difficulty_level?.message}
+                  error={!!errors.difficulty}
+                  helperText={errors.difficulty?.message}
                 />
               )}
             />
@@ -213,7 +337,15 @@ export default function TaskCreateForm({ row, isEditMode, onSubmit }: any) {
 
         <Grid size={12}>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
-            <Button variant="outlined">Cancel</Button>
+            <Button
+              variant="outlined"
+              onClick={() => {
+                // returnTo ? navigate(returnTo) : navigate(-1);
+                if (returnTo) navigate(returnTo);
+              }}
+            >
+              Cancel
+            </Button>
 
             <Button variant="contained" type="submit">
               {isEditMode ? 'Update Test' : 'Next'}

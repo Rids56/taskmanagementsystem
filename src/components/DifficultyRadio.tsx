@@ -42,15 +42,9 @@ export default function DifficultyRadio({
           mt: 3,
         }}
       >
-        <FormControlLabel value="Easy" control={<Radio />} label="Easy" />
-
-        <FormControlLabel value="Medium" control={<Radio />} label="Medium" />
-
-        <FormControlLabel
-          value="Difficult"
-          control={<Radio />}
-          label="Difficult"
-        />
+        <FormControlLabel value="easy" control={<Radio />} label="Easy" />
+        <FormControlLabel value="medium" control={<Radio />} label="Medium" />
+        <FormControlLabel value="hard" control={<Radio />} label="Hard" />
       </RadioGroup>
       {helperText && <FormHelperText>{helperText}</FormHelperText>}
     </FormControl>

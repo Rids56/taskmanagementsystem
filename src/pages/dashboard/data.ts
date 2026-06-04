@@ -9,55 +9,57 @@
 
 export interface Test {
   id: number;
-  test_name: string;
+  name: string;
+  type: string;
   subject: string;
-  test_type: string;
   topics: string[];
   sub_topics: string[];
-  difficulty_level: 'Easy' | 'Medium' | 'Difficult';
+  questions: string[];
   correct_marks: number;
   wrong_marks: number;
-  unattempt_marks: number;
+  difficulty: 'easy' | 'medium' | 'hard';
+  total_marks: number;
   total_time: number;
   total_questions: number;
-  total_marks: number;
-  status: 'Draft' | 'Published';
+  status: 'draft' | 'live';
+
+  unattempt_marks: number;
   created_date: string;
 }
 
-export const mockTests: Test[] = [
-  {
-    id: 1,
-    test_name: 'Physics Chapter 1',
-    subject: 'Physics',
-    test_type: 'Chapter Wise',
-    topics: ['Motion'],
-    sub_topics: ['Velocity'],
-    difficulty_level: 'Easy',
-    correct_marks: 5,
-    wrong_marks: -1,
-    unattempt_marks: 0,
-    total_time: 60,
-    total_questions: 50,
-    total_marks: 100,
-    status: 'Published',
-    created_date: '2026-06-03',
-  },
-  {
-    id: 2,
-    test_name: 'Chemistry PYQ',
-    subject: 'Chemistry',
-    test_type: 'PYQ',
-    topics: ['Organic'],
-    sub_topics: ['Hydrocarbon'],
-    difficulty_level: 'Medium',
-    correct_marks: 4,
-    wrong_marks: -1,
-    unattempt_marks: 0,
-    total_time: 90,
-    total_questions: 20,
-    total_marks: 120,
-    status: 'Draft',
-    created_date: '2026-06-01',
-  },
-];
+// export const mockTests: Test[] = [
+//   {
+//     id: 1,
+//     name: 'Physics Chapter 1',
+//     subject: 'Physics',
+//     type: 'Chapter Wise',
+//     topics: ['Motion'],
+//     sub_topics: ['Velocity'],
+//     difficulty: 'Easy',
+//     correct_marks: 5,
+//     wrong_marks: -1,
+//     unattempt_marks: 0,
+//     total_time: 60,
+//     total_questions: 50,
+//     total_marks: 100,
+//     status: 'live',
+//     created_date: '2026-06-03',
+//   },
+//   {
+//     id: 2,
+//     name: 'Chemistry PYQ',
+//     subject: 'Chemistry',
+//     type: 'PYQ',
+//     topics: ['Organic'],
+//     sub_topics: ['Hydrocarbon'],
+//     difficulty: 'Medium',
+//     correct_marks: 4,
+//     wrong_marks: -1,
+//     unattempt_marks: 0,
+//     total_time: 90,
+//     total_questions: 20,
+//     total_marks: 120,
+//     status: 'draft',
+//     created_date: '2026-06-01',
+//   },
+// ];

@@ -14,6 +14,7 @@ import QuizOutlinedIcon from '@mui/icons-material/QuizOutlined';
 import AssessmentOutlinedIcon from '@mui/icons-material/AssessmentOutlined';
 import SchoolOutlinedIcon from '@mui/icons-material/SchoolOutlined';
 import { useNavigate } from 'react-router-dom';
+import { TopicOption } from '../interfaceType';
 
 interface TestInfoCardProps {
   rowData: any;
@@ -46,7 +47,8 @@ export default function TestInfoCard({ rowData }: TestInfoCardProps) {
           navigate('/task-create', {
             state: {
               mode: 'edit',
-              rowData: rowData,
+              // rowData: rowData,
+              id: rowData.id,
               returnTo: '/add-question',
             },
           })
@@ -57,7 +59,7 @@ export default function TestInfoCard({ rowData }: TestInfoCardProps) {
 
       {/* Test Type */}
       <Chip
-        label={rowData?.test_type ?? 'Chapter Wise'}
+        label={rowData?.type ?? 'Chapter Wise'}
         sx={{
           mb: 3,
           bgcolor: '#09104D',
@@ -71,11 +73,11 @@ export default function TestInfoCard({ rowData }: TestInfoCardProps) {
         <SchoolOutlinedIcon color="primary" sx={{ fontSize: 32 }} />
 
         <Typography sx={{ fontWeight: 700 }} variant="h4">
-          {rowData?.test_name}
+          {rowData?.name}
         </Typography>
 
         <Chip
-          label={rowData?.difficulty_level}
+          label={rowData?.difficulty}
           color="success"
           sx={{
             borderRadius: 2,
@@ -100,7 +102,9 @@ export default function TestInfoCard({ rowData }: TestInfoCardProps) {
               Subject
             </Typography>
 
-            <Typography sx={{ fontWeight: 500 }}>{rowData?.subject}</Typography>
+            <Typography sx={{ fontWeight: 500 }}>
+              {rowData?.subject?.name ?? ''}
+            </Typography>
           </Stack>
 
           <Stack direction="row" spacing={3}>
@@ -109,10 +113,10 @@ export default function TestInfoCard({ rowData }: TestInfoCardProps) {
             </Typography>
 
             <Stack direction="row" spacing={1}>
-              {rowData?.topics?.map((topic: string) => (
+              {rowData?.topics?.map((topic: TopicOption) => (
                 <Chip
-                  key={topic}
-                  label={topic}
+                  key={topic?.id}
+                  label={topic?.name}
                   variant="outlined"
                   color="warning"
                 />
@@ -126,10 +130,10 @@ export default function TestInfoCard({ rowData }: TestInfoCardProps) {
             </Typography>
 
             <Stack direction="row" spacing={1}>
-              {rowData?.sub_topics?.map((subTopic: string) => (
+              {rowData?.sub_topics?.map((subTopic: TopicOption) => (
                 <Chip
-                  key={subTopic}
-                  label={subTopic}
+                  key={subTopic?.id}
+                  label={subTopic?.name}
                   variant="outlined"
                   color="warning"
                 />

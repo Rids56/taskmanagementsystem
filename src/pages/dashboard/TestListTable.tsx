@@ -1,44 +1,81 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Box, Chip, IconButton, Paper, Tooltip } from '@mui/material';
+import { useDispatch, useSelector } from 'react-redux';
 
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 
 import { MaterialReactTable, MRT_ColumnDef } from 'material-react-table';
-import { mockTests, Test } from './data';
 import { useNavigate } from 'react-router-dom';
+import { TestList } from '../interfaceType';
+import { RootState } from '@/src/store/store';
+import {
+  getTestListRequest,
+  getTestByIdRequest,
+  resetTestList,
+} from '../../store/slices/testListSlice';
 
 export default function TestListTable() {
   const navigate = useNavigate();
-  const data = useMemo<Test[]>(() => mockTests, []);
-  const columns = useMemo<MRT_ColumnDef<Test>[]>(
+  const dispatch = useDispatch();
+  const { data: testListData, loading: testListLoader } = useSelector(
+    (state: RootState) => state?.testList ?? []
+  );
+
+  useEffect(() => {
+    dispatch(getTestListRequest());
+
+    return (): void => {
+      dispatch(resetTestList());
+    };
+  }, []);
+
+  const data = useMemo<TestList[]>(() => testListData ?? [], [testListData]);
+
+  const columns = useMemo<MRT_ColumnDef<TestList>[]>(
     () => [
       {
-        accessorKey: 'test_name',
+        accessorKey: 'name',
         header: 'Test Name',
         size: 250,
+      },
+      {
+        accessorKey: 'type',
+        header: 'Test Type',
       },
       {
         accessorKey: 'subject',
         header: 'Subject',
       },
       {
-        accessorKey: 'test_type',
-        header: 'Test Type',
+        accessorKey: 'topics',
+        header: 'Topics',
       },
       {
-        accessorKey: 'difficulty_level',
+        accessorKey: 'sub_topics',
+        header: 'Sub Topics',
+      },
+      {
+        accessorKey: 'correct_marks',
+        header: 'Correct Marks',
+      },
+      {
+        accessorKey: 'wrong_marks',
+        header: 'Wrong Marks',
+      },
+      {
+        accessorKey: 'difficulty',
         header: 'Difficulty',
+      },
+      {
+        accessorKey: 'total_marks',
+        header: 'Total Marks',
       },
       {
         accessorKey: 'total_time',
         header: 'Total Time',
         Cell: ({ cell }: any) => `${cell.getValue()} min`,
-      },
-      {
-        accessorKey: 'total_marks',
-        header: 'Total Marks',
       },
       {
         accessorKey: 'total_questions',
@@ -51,9 +88,13 @@ export default function TestListTable() {
           <Chip
             size="small"
             label={cell.getValue()}
-            color={cell.getValue() === 'Published' ? 'success' : 'warning'}
+            color={cell.getValue() === 'live' ? 'success' : 'warning'}
           />
         ),
+      },
+      {
+        accessorKey: 'unattempt_marks',
+        header: 'Unattempt Marks',
       },
       {
         accessorKey: 'created_date',
@@ -70,7 +111,9 @@ export default function TestListTable() {
             <Tooltip title="View">
               <IconButton
                 size="small"
-                onClick={() => console.log('View', row.original)}
+                onClick={() => {
+                  dispatch(getTestByIdRequest(row.original.id.toString()));
+                }}
               >
                 <VisibilityOutlinedIcon fontSize="small" />
               </IconButton>
@@ -83,7 +126,8 @@ export default function TestListTable() {
                   navigate('/task-create', {
                     state: {
                       mode: 'edit',
-                      rowData: row.original,
+                      // rowData: row.original,
+                      id: row.original.id,
                       returnTo: '/dashboard',
                     },
                   })
@@ -129,6 +173,7 @@ export default function TestListTable() {
         enableColumnFilters={false}
         enableGlobalFilter
         positionGlobalFilter="left"
+        enableStickyHeader
         initialState={{
           pagination: {
             pageIndex: 0,
@@ -136,10 +181,17 @@ export default function TestListTable() {
           },
           columnPinning: { right: ['actions'] },
         }}
+        state={{
+          isLoading: testListLoader,
+        }}
         muiTablePaperProps={{
           elevation: 0,
           sx: {
             borderRadius: 2,
+            height: 'calc(100vh - 205px)',
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column',
           },
         }}
       />

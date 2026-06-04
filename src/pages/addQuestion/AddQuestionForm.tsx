@@ -59,11 +59,11 @@ export default function AddQuestionForm({ methods, onSubmit }: any) {
             select
             fullWidth
             label="Difficulty"
-            {...register('difficulty_level')}
+            {...register('difficulty')}
           >
-            <MenuItem value="Easy">Easy</MenuItem>
-            <MenuItem value="Medium">Medium</MenuItem>
-            <MenuItem value="Difficult">Difficult</MenuItem>
+            <MenuItem value="easy">Easy</MenuItem>
+            <MenuItem value="medium">Medium</MenuItem>
+            <MenuItem value="hard">Hard</MenuItem>
           </TextField>
         </Grid>
 

@@ -1,36 +1,52 @@
 import { z } from 'zod';
 
 export const taskCreateSchema = z.object({
-  test_name: z
+  name: z
     .string({ error: 'Test Name is required' })
     .trim()
     .min(1, { message: 'Test Name is required' }),
 
   subject: z
-    .string({ error: 'Subject is required' })
-    .trim()
-    .min(1, { message: 'Subject is required' }),
+    .object({
+      id: z.string(),
+      name: z.string(),
+    })
+    .refine((value) => value.id.trim() !== '' && value.name.trim() !== '', {
+      message: 'Subject is required',
+    }),
 
-  test_type: z
+  type: z
     .string({ error: 'Test Type is required' })
     .trim()
     .min(1, { message: 'Test Type is required' }),
 
   topics: z
-    .array(z.string())
-    .optional()
-    .refine((value) => Array.isArray(value) && value.length > 0, {
-      message: 'Please select at least one topic',
-    }),
+    .array(
+      z.object({
+        id: z.string(),
+        name: z.string(),
+        subject_id: z.string().optional(),
+      })
+    )
+    .optional(),
+  // .refine((value) => Array.isArray(value) && value.length > 0, {
+  //   message: 'Please select at least one topic',
+  // }),
 
   sub_topics: z
-    .array(z.string())
-    .optional()
-    .refine((value) => Array.isArray(value) && value.length > 0, {
-      message: 'Please select at least one sub-topic',
-    }),
+    .array(
+      z.object({
+        id: z.string(),
+        name: z.string(),
+        topic_id: z.string().optional(),
+      })
+    )
+    .optional(),
+  //   .refine((value) => Array.isArray(value) && value.length > 0, {
+  //     message: 'Please select at least one sub-topic',
+  //   }),
 
-  difficulty_level: z.enum(['Easy', 'Medium', 'Difficult'], {
+  difficulty: z.enum(['easy', 'medium', 'hard'], {
     error: 'Difficulty Level is required',
   }),
 
@@ -66,7 +82,7 @@ export const taskCreateSchema = z.object({
     })
     .min(1, 'Total questions must be greater than 0'),
 
-  status: z.enum(['Draft', 'Published']).optional(),
+  status: z.enum(['draft', 'live']).optional(),
 });
 
 export type TaskCreateFormValues = z.infer<typeof taskCreateSchema>;

@@ -12,7 +12,7 @@ export const addQuestionSchema = z.object({
 
   explanation: z.string().optional(),
 
-  difficulty_level: z.string().optional(),
+  difficulty: z.string().optional(),
 
   topic: z.string().optional(),
 

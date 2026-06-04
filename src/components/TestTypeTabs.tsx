@@ -2,18 +2,35 @@ import { Tabs, Tab, Box } from '@mui/material';
 
 export default function TestTypeTabs({ methods }: any) {
   const { watch, setValue } = methods;
-  const tabMapping = ['Chapter Wise', 'PYQ', 'Mock Test'];
+  // const tabMapping = ['chapterwise', 'pyq', 'mock'];
+  const tabMapping = [
+    {
+      label: 'Chapter Wise',
+      value: 'chapterwise',
+    },
+    {
+      label: 'PYQ',
+      value: 'pyq',
+    },
+    {
+      label: 'Mock',
+      value: 'mock',
+    },
+  ];
 
-  const testType = watch('test_type');
+  const testType = watch('type');
 
-  const tabValue = Math.max(tabMapping.indexOf(testType), 0);
+  const tabValue = Math.max(
+    tabMapping.findIndex((tab) => tab.value === testType),
+    0
+  );
 
   return (
     <Box sx={{ bgcolor: 'background.paper', width: 500 }}>
       <Tabs
         value={tabValue}
         onChange={(_, newValue) => {
-          setValue('test_type', tabMapping[newValue], {
+          setValue('type', tabMapping[newValue].value, {
             shouldDirty: true,
           });
         }}
@@ -28,7 +45,7 @@ export default function TestTypeTabs({ methods }: any) {
         }}
       >
         {tabMapping.map((tab) => (
-          <Tab key={tab} label={tab} />
+          <Tab key={tab.value} label={tab.label} />
         ))}
       </Tabs>
     </Box>

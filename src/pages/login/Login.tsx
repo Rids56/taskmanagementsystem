@@ -40,7 +40,7 @@ const Login: React.FC = () => {
     try {
       const response = await loginApi(data);
 
-      if (!response?.success) {
+      if (!response?.status) {
         throw new Error('Login failed');
       }
 
