@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 export const taskCreateSchema = z.object({
+  id: z.string().optional(),
   name: z
     .string({ error: 'Test Name is required' })
     .trim()

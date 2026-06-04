@@ -19,7 +19,7 @@ import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
 
 import { useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../../hooks';
-import { logout } from '../../../pages/features/auth/authSlice';
+import { logout } from '../../../store/slices/authSlice';
 
 export default function Navbar() {
   const navigate = useNavigate();

@@ -4,7 +4,7 @@ import {
   Link,
   Typography,
   Paper,
-  CircularProgress,
+  // CircularProgress,
   Snackbar,
   Alert,
 } from '@mui/material';
@@ -27,6 +27,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getTopicsBySubjectApi } from '../../api/topicApi';
 import { getSubTopicsByTopicApi } from '../../api/subTopicApi';
 import { getDirtyValues } from '../../utils/getDirtyValues';
+import LoaderOverlay from '../../components/LoaderOverlay';
 
 export default function TaskCreate() {
   const dispatch = useDispatch();
@@ -42,17 +43,6 @@ export default function TaskCreate() {
     mode: 'onSubmit',
     defaultValues: {
       type: 'chapterwise',
-      subject: { id: '', name: '' },
-      topics: [],
-      sub_topics: [],
-      difficulty: 'easy',
-      correct_marks: 0,
-      wrong_marks: 0,
-      unattempt_marks: 0,
-      total_time: 0,
-      total_marks: 0,
-      total_questions: 0,
-      // status: 'draft',
     },
   });
 
@@ -63,7 +53,9 @@ export default function TaskCreate() {
   } = methods;
 
   // Selectors
-  const { data: subjects } = useSelector((state: RootState) => state.subjects);
+  const { data: subjects, loading: subjectLoader } = useSelector(
+    (state: RootState) => state.subjects
+  );
   const {
     selected: getOnesuccessTest,
     loading,
@@ -76,21 +68,22 @@ export default function TaskCreate() {
   const [snackbarMsg, setSnackbarMsg] = useState('');
 
   useEffect(() => {
-    if (!subjects?.length) {
-      dispatch(getSubjectsRequest());
-    }
-
     if (isEditMode && editId) {
       dispatch(getTestByIdRequest(editId));
+
+      if (subjects?.length === 0) {
+        dispatch(getSubjectsRequest());
+      }
     }
-  }, [dispatch, isEditMode, editId, subjects?.length]);
+  }, [isEditMode, editId]);
 
   useEffect(() => {
-    if (getOnesuccessTest && isEditMode && !loading && subjects?.length > 0) {
+    // if (getOnesuccessTest && isEditMode && !loading && subjects?.length > 0) {
+    if (getOnesuccessTest && subjects?.length > 0) {
       hydrateEditForm(getOnesuccessTest);
       // reset(getOnesuccessTest as any);
     }
-  }, [getOnesuccessTest, isEditMode, loading, subjects?.length]);
+  }, [getOnesuccessTest]);
 
   // Handle create test result: navigate on success, show toast on failure
   useEffect(() => {
@@ -113,7 +106,6 @@ export default function TaskCreate() {
       return;
     }
 
-    // success
     if (!loading && !error && getOnesuccessTest) {
       // if (isEditMode) {
       //   navigate(returnTo ?? '/dashboard', {
@@ -138,7 +130,7 @@ export default function TaskCreate() {
 
   const hydrateEditForm = async (testData: any) => {
     // 1. Subject
-    const selectedSubject = subjects.find(
+    const selectedSubject = subjects?.find(
       (subject) => subject.name === testData.subject
     );
 
@@ -191,32 +183,37 @@ export default function TaskCreate() {
 
   const onSubmit = async (data: TaskCreateFormValues) => {
     if (Object.keys(errors).length === 0) {
-      const finalPayload = {
-        ...data,
-        subject: data.subject?.id ?? '',
-        topics: (data.topics ?? []).map((t: any) => t.id),
-        sub_topics: (data.sub_topics ?? []).map((s: any) => s.id),
-      };
-
       rowDataRef.current = data;
       setPendingSave(true);
+      const dirtyData = getDirtyValues(data, dirtyFields);
+
+      if (Object.keys(dirtyData).length === 0) {
+        setSnackbarMsg('No fields to update');
+        setSnackbarOpen(true);
+        setPendingSave(false);
+        return;
+      }
 
       if (isEditMode && editId) {
-        const dirtyData = getDirtyValues(data, dirtyFields);
-        console.log('dirtyData', dirtyData);
-        // const finalPayload = {
-        //   ...dirtyData,
-        //   ...(dirtyData.subject && { subject: dirtyData.subject?.id ?? '' }),
-        //   ...(dirtyData.topics && {
-        //     topics: (dirtyData.topics ?? []).map((t: any) => t.id),
-        //   }),
-        //   ...(dirtyData.sub_topics && {
-        //     sub_topics: (dirtyData.sub_topics ?? []).map((s: any) => s.id),
-        //   }),
-        // };
+        const finalPayload = {
+          ...dirtyData,
+          ...(dirtyData.subject && { subject: dirtyData.subject?.id ?? '' }),
+          ...(dirtyData.topics && {
+            topics: (dirtyData.topics ?? []).map((t: any) => t.id),
+          }),
+          ...(dirtyData.sub_topics && {
+            sub_topics: (dirtyData.sub_topics ?? []).map((s: any) => s.id),
+          }),
+        };
 
         dispatch(updateTestRequest({ id: editId, payload: finalPayload }));
       } else {
+        const finalPayload = {
+          ...data,
+          subject: data.subject?.id ?? '',
+          topics: (data.topics ?? []).map((t: any) => t.id),
+          sub_topics: (data.sub_topics ?? []).map((s: any) => s.id),
+        };
         dispatch(createTestRequest(finalPayload));
       }
     } else {
@@ -224,7 +221,7 @@ export default function TaskCreate() {
     }
   };
 
-  const showLoader = isEditMode && loading;
+  const showLoader = isEditMode && loading && !subjectLoader;
 
   return (
     <Box>
@@ -249,34 +246,20 @@ export default function TaskCreate() {
           borderColor: 'divider',
         }}
       >
-        {showLoader ? (
-          <Box
-            sx={{
-              minHeight: '60vh',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}
-          >
-            <CircularProgress />
+        <LoaderOverlay loading={showLoader}>
+          <TestTypeTabs methods={methods} />
+          <Box sx={{ mt: 4 }}>
+            <FormProvider {...methods}>
+              <TaskCreateForm isEditMode={isEditMode} onSubmit={onSubmit} />
+            </FormProvider>
           </Box>
-        ) : (
-          <>
-            <TestTypeTabs methods={methods} />
-
-            <Box sx={{ mt: 4 }}>
-              <FormProvider {...methods}>
-                <TaskCreateForm isEditMode={isEditMode} onSubmit={onSubmit} />
-              </FormProvider>
-            </Box>
-          </>
-        )}
+        </LoaderOverlay>
       </Paper>
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={6000}
         onClose={() => setSnackbarOpen(false)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
       >
         <Alert
           onClose={() => setSnackbarOpen(false)}

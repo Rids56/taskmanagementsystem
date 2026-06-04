@@ -2,16 +2,17 @@ import {
   Autocomplete,
   Box,
   Button,
+  // CircularProgress,
   FormLabel,
   Grid,
   TextField,
 } from '@mui/material';
-import { Controller, useFormContext, useWatch } from 'react-hook-form';
+import { Controller, useFormContext } from 'react-hook-form';
 import DifficultyRadio from '../../components/DifficultyRadio';
 import MarkingSchemeFields from '../../components/MarkingSchemeFields';
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo } from 'react';
 import { TaskCreateFormValues } from './model/create.schema';
-import { RootState } from '@/src/store/store';
+import { RootState } from '../../store/store';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   getSubjectsRequest,
@@ -26,10 +27,12 @@ import {
   getSubTopicsRequest,
 } from '../../store/slices/subTopicSlice';
 import { useLocation, useNavigate } from 'react-router-dom';
+import LoaderOverlay from '../../components/LoaderOverlay';
 
 export default function TaskCreateForm({ isEditMode, onSubmit }: any) {
   const {
     control,
+    watch,
     // reset,
     // getValues,
     setValue,
@@ -39,18 +42,20 @@ export default function TaskCreateForm({ isEditMode, onSubmit }: any) {
   const dispatch = useDispatch();
   const location = useLocation();
   const navigate = useNavigate();
-  const isInternalUpdate = useRef(false);
 
   const returnTo = location.state?.returnTo;
 
-  const selectedSubject = useWatch({
-    control,
-    name: 'subject',
-  });
-  const selectedTopics = useWatch({
-    control,
-    name: 'topics',
-  });
+  // const selectedSubject = useWatch({
+  //   control,
+  //   name: 'subject',
+  // });
+  // const selectedTopics = useWatch({
+  //   control,
+  //   name: 'topics',
+  // });
+
+  const selectedSubject = watch('subject');
+  const selectedTopics = watch('topics');
 
   // Selectors
   const { data: subjects, loading: subjectLoader } = useSelector(
@@ -64,67 +69,32 @@ export default function TaskCreateForm({ isEditMode, onSubmit }: any) {
   );
 
   useEffect(() => {
-    if (!subjects) dispatch(getSubjectsRequest());
+    if (subjects?.length === 0) dispatch(getSubjectsRequest());
 
     return (): void => {
       // dispatch(resetSubject());
       // dispatch(resetTopics());
       // dispatch(resetSubTopics());
     };
-  }, [dispatch]);
+  }, []);
 
-  // // // API -> TOPIC
-  // useEffect(() => {
-  //   if (!selectedSubject?.id) return;
-
-  //   const shouldResetTopics =
-  //     !selectedTopics?.length ||
-  //     selectedTopics.some((topic) => topic.subject_id !== selectedSubject.id);
-
-  //   if (shouldResetTopics) {
-  //     setValue('topics', []);
-  //     dispatch(resetTopics());
-  //   }
-
-  //   dispatch(getTopicsRequest(selectedSubject.id));
-  // }, [dispatch, selectedSubject?.id, selectedTopics, setValue]);
+  // API -> TOPIC
   useEffect(() => {
     if (!selectedSubject?.id) return;
 
-    dispatch(getTopicsRequest(selectedSubject.id));
+    const shouldResetTopics =
+      !selectedTopics?.length ||
+      selectedTopics.some((topic) => topic.subject_id !== selectedSubject.id);
 
-    if (isInternalUpdate.current) return;
-
-    if (
-      selectedTopics?.length &&
-      selectedTopics.every((t) => t.subject_id === selectedSubject.id)
-    ) {
-      return;
+    if (shouldResetTopics) {
+      setValue('topics', []);
+      dispatch(resetTopics());
     }
 
-    isInternalUpdate.current = true;
-    setValue('topics', []);
-    dispatch(resetTopics());
+    dispatch(getTopicsRequest(selectedSubject.id));
+  }, [selectedTopics]);
 
-    setTimeout(() => {
-      isInternalUpdate.current = false;
-    }, 0);
-  }, [selectedSubject?.id]);
-
-  // // // API -> SUB-TOPIC
-  // useEffect(() => {
-  //   if (!selectedTopics?.length) {
-  //     dispatch(resetSubTopics());
-  //     setValue('sub_topics', []);
-  //     return;
-  //   }
-
-  //   dispatch(resetSubTopics());
-
-  //   selectedTopics.forEach((topic) => {
-  //     dispatch(getSubTopicsRequest(topic.id));
-  //   });
-  // }, [dispatch, selectedTopics, setValue]);
+  // API -> SUB-TOPIC
   useEffect(() => {
     if (!selectedTopics?.length) {
       dispatch(resetSubTopics());
@@ -168,191 +138,197 @@ export default function TaskCreateForm({ isEditMode, onSubmit }: any) {
     [subTopics]
   );
 
+  const showLoader = topicLoader && subTopicLoader;
+
   return (
-    <Box component="form" onSubmit={handleSubmit(onSubmit)}>
-      <Grid container spacing={4}>
-        <Grid size={{ xs: 12, md: 6 }}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <FormLabel>Subject</FormLabel>
-            <Controller
-              name="subject"
-              control={control}
-              render={({ field }) => (
-                <Autocomplete
-                  id="subject"
-                  selectOnFocus
-                  loading={subjectLoader}
-                  value={field.value ?? null}
-                  onChange={(_, value) => field.onChange(value)}
-                  isOptionEqualToValue={(option, value) =>
-                    option.id === value.id
-                  }
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="Choose from Drop-down"
-                      error={!!errors.subject}
-                      helperText={errors.subject?.message}
+    <>
+      <LoaderOverlay loading={showLoader}>
+        <Box component="form" onSubmit={handleSubmit(onSubmit)}>
+          <Grid container spacing={4}>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <FormLabel>Subject</FormLabel>
+                <Controller
+                  name="subject"
+                  control={control}
+                  render={({ field }) => (
+                    <Autocomplete
+                      id="subject"
+                      selectOnFocus
+                      loading={subjectLoader}
+                      value={field.value ?? null}
+                      onChange={(_, value) => field.onChange(value)}
+                      isOptionEqualToValue={(option, value) =>
+                        option.id === value.id
+                      }
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          label="Choose from Drop-down"
+                          error={!!errors.subject}
+                          helperText={errors.subject?.message}
+                        />
+                      )}
+                      options={subjectOptions}
+                      getOptionLabel={(option) => option.name}
                     />
                   )}
-                  options={subjectOptions}
-                  getOptionLabel={(option) => option.name}
                 />
-              )}
-            />
-          </Box>
-        </Grid>
+              </Box>
+            </Grid>
 
-        <Grid size={{ xs: 12, md: 6 }}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <FormLabel>Name of Test</FormLabel>
-            <Controller
-              name="name"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  fullWidth
-                  placeholder="Enter name of Test"
-                  error={!!errors.name}
-                  helperText={errors.name?.message}
-                  {...field}
-                />
-              )}
-            />
-          </Box>
-        </Grid>
-
-        <Grid size={{ xs: 12, md: 6 }}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <FormLabel>Topic</FormLabel>
-            <Controller
-              name="topics"
-              control={control}
-              render={({ field }) => (
-                <Autocomplete
-                  id="topics"
-                  selectOnFocus
-                  multiple
-                  loading={topicLoader}
-                  value={field.value ?? []}
-                  onChange={(_, value) => field.onChange(value)}
-                  isOptionEqualToValue={(option, value) =>
-                    option.id === value.id
-                  }
-                  renderInput={(params) => (
+            <Grid size={{ xs: 12, md: 6 }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <FormLabel>Name of Test</FormLabel>
+                <Controller
+                  name="name"
+                  control={control}
+                  render={({ field }) => (
                     <TextField
-                      {...params}
-                      label="Choose from Drop-down"
-                      error={!!errors.topics}
-                      helperText={errors.topics?.message}
+                      fullWidth
+                      placeholder="Enter name of Test"
+                      error={!!errors.name}
+                      helperText={errors.name?.message}
+                      {...field}
                     />
                   )}
-                  options={topicOptions}
-                  getOptionLabel={(option) => option.name}
                 />
-              )}
-            />
-          </Box>
-        </Grid>
+              </Box>
+            </Grid>
 
-        <Grid size={{ xs: 12, md: 6 }}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <FormLabel>Sub Topic</FormLabel>
-            <Controller
-              name="sub_topics"
-              control={control}
-              render={({ field }) => (
-                <Autocomplete
-                  id="sub_topics"
-                  selectOnFocus
-                  multiple
-                  // value={getOptionsByValues(field.value, subTopicOptions)}
-                  // onChange={(_, value) =>
-                  //   field.onChange(value.map((option) => option.name))
-                  // }
-                  loading={subTopicLoader}
-                  value={field.value ?? []}
-                  onChange={(_, value) => field.onChange(value)}
-                  isOptionEqualToValue={(option, value) =>
-                    option.id === value.id
-                  }
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="Choose from Drop-down"
-                      error={!!errors.sub_topics}
-                      helperText={errors.sub_topics?.message}
+            <Grid size={{ xs: 12, md: 6 }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <FormLabel>Topic</FormLabel>
+                <Controller
+                  name="topics"
+                  control={control}
+                  render={({ field }) => (
+                    <Autocomplete
+                      id="topics"
+                      selectOnFocus
+                      multiple
+                      loading={topicLoader}
+                      value={field.value ?? []}
+                      onChange={(_, value) => field.onChange(value)}
+                      isOptionEqualToValue={(option, value) =>
+                        option.id === value.id
+                      }
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          label="Choose from Drop-down"
+                          error={!!errors.topics}
+                          helperText={errors.topics?.message}
+                        />
+                      )}
+                      options={topicOptions}
+                      getOptionLabel={(option) => option.name}
                     />
                   )}
-                  options={subTopicOptions}
-                  getOptionLabel={(option) => option.name}
                 />
-              )}
-            />
-          </Box>
-        </Grid>
+              </Box>
+            </Grid>
 
-        <Grid size={{ xs: 12, md: 6 }}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <FormLabel>Duration (Minutes)</FormLabel>
-            <Controller
-              name="total_time"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  fullWidth
-                  placeholder="Enter the time"
-                  type="number"
-                  error={!!errors.total_time}
-                  helperText={errors.total_time?.message}
-                  {...field}
+            <Grid size={{ xs: 12, md: 6 }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <FormLabel>Sub Topic</FormLabel>
+                <Controller
+                  name="sub_topics"
+                  control={control}
+                  render={({ field }) => (
+                    <Autocomplete
+                      id="sub_topics"
+                      selectOnFocus
+                      multiple
+                      // value={getOptionsByValues(field.value, subTopicOptions)}
+                      // onChange={(_, value) =>
+                      //   field.onChange(value.map((option) => option.name))
+                      // }
+                      loading={subTopicLoader}
+                      value={field.value ?? []}
+                      onChange={(_, value) => field.onChange(value)}
+                      isOptionEqualToValue={(option, value) =>
+                        option.id === value.id
+                      }
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          label="Choose from Drop-down"
+                          error={!!errors.sub_topics}
+                          helperText={errors.sub_topics?.message}
+                        />
+                      )}
+                      options={subTopicOptions}
+                      getOptionLabel={(option) => option.name}
+                    />
+                  )}
                 />
-              )}
-            />
-          </Box>
-        </Grid>
+              </Box>
+            </Grid>
 
-        <Grid size={{ xs: 12, md: 6 }}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-            <Controller
-              name="difficulty"
-              control={control}
-              render={({ field }) => (
-                <DifficultyRadio
-                  value={field.value}
-                  name={field.name}
-                  onChange={(_, value) => field.onChange(value)}
-                  onBlur={field.onBlur}
-                  error={!!errors.difficulty}
-                  helperText={errors.difficulty?.message}
+            <Grid size={{ xs: 12, md: 6 }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <FormLabel>Duration (Minutes)</FormLabel>
+                <Controller
+                  name="total_time"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      fullWidth
+                      placeholder="Enter the time"
+                      type="number"
+                      error={!!errors.total_time}
+                      helperText={errors.total_time?.message}
+                      {...field}
+                    />
+                  )}
                 />
-              )}
-            />
-          </Box>
-        </Grid>
+              </Box>
+            </Grid>
 
-        <Grid size={12}>
-          <MarkingSchemeFields />
-        </Grid>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                <Controller
+                  name="difficulty"
+                  control={control}
+                  render={({ field }) => (
+                    <DifficultyRadio
+                      value={field.value}
+                      name={field.name}
+                      onChange={(_, value) => field.onChange(value)}
+                      onBlur={field.onBlur}
+                      error={!!errors.difficulty}
+                      helperText={errors.difficulty?.message}
+                    />
+                  )}
+                />
+              </Box>
+            </Grid>
 
-        <Grid size={12}>
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
-            <Button
-              variant="outlined"
-              onClick={() => {
-                // returnTo ? navigate(returnTo) : navigate(-1);
-                if (returnTo) navigate(returnTo);
-              }}
-            >
-              Cancel
-            </Button>
+            <Grid size={12}>
+              <MarkingSchemeFields />
+            </Grid>
 
-            <Button variant="contained" type="submit">
-              {isEditMode ? 'Update Test' : 'Next'}
-            </Button>
-          </Box>
-        </Grid>
-      </Grid>
-    </Box>
+            <Grid size={12}>
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+                <Button
+                  variant="outlined"
+                  onClick={() => {
+                    // returnTo ? navigate(returnTo) : navigate(-1);
+                    if (returnTo) navigate(returnTo);
+                  }}
+                >
+                  Cancel
+                </Button>
+
+                <Button variant="contained" type="submit">
+                  {isEditMode ? 'Update Test' : 'Next'}
+                </Button>
+              </Box>
+            </Grid>
+          </Grid>
+        </Box>
+      </LoaderOverlay>
+    </>
   );
 }

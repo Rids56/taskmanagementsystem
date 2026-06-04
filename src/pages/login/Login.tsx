@@ -18,8 +18,8 @@ import { useAppDispatch } from '../../hooks';
 import logo from '../../assets/logo.png';
 import frame from '../../assets/frame.png';
 import { LoginFormValues, loginSchema } from './model/schema';
-import { loginApi } from '../features/auth/authApi';
-import { setCredentials } from '../features/auth/authSlice';
+import { loginApi } from '../../api/authApi';
+import { setCredentials } from '../../store/slices/authSlice';
 
 const Login: React.FC = () => {
   const dispatch = useAppDispatch();
