@@ -12,9 +12,14 @@ export const taskCreateSchema = z.object({
       id: z.string(),
       name: z.string(),
     })
-    .refine((value) => value.id.trim() !== '' && value.name.trim() !== '', {
-      message: 'Subject is required',
-    }),
+    .nullable()
+    .refine(
+      (value) =>
+        value !== null && value.id.trim() !== '' && value.name.trim() !== '',
+      {
+        message: 'Subject is required',
+      }
+    ),
 
   type: z
     .string({ error: 'Test Type is required' })

@@ -4,7 +4,7 @@ import {
   getTestByIdApi,
   createTestApi,
   updateTestApi,
-} from '../../api/testList';
+} from '../api/testList';
 import {
   getTestListRequest,
   getTestListSuccess,

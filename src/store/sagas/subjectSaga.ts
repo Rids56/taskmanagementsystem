@@ -1,5 +1,5 @@
 import { call, put, takeLatest } from 'redux-saga/effects';
-import { getSubjectsApi } from '../../api/subjectApi';
+import { getSubjectsApi } from '../api/subjectApi';
 import {
   getSubjectsRequest,
   getSubjectsSuccess,

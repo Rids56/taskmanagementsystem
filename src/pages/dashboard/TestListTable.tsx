@@ -12,7 +12,6 @@ import { TestList } from '../interfaceType';
 import { RootState } from '@/src/store/store';
 import {
   getTestListRequest,
-  getTestByIdRequest,
   resetTestList,
 } from '../../store/slices/testListSlice';
 
@@ -112,7 +111,15 @@ export default function TestListTable() {
               <IconButton
                 size="small"
                 onClick={() => {
-                  dispatch(getTestByIdRequest(row.original.id.toString()));
+                  // dispatch(getTestByIdRequest(row.original.id.toString()));
+                  navigate('/task-create', {
+                    state: {
+                      mode: 'view',
+                      // rowData: row.original,
+                      id: row.original.id,
+                      returnTo: '/dashboard',
+                    },
+                  });
                 }}
               >
                 <VisibilityOutlinedIcon fontSize="small" />
