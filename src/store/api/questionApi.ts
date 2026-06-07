@@ -14,3 +14,8 @@ export const getQuestionsBulkApi = async (payload: any) => {
   const response = await axios.post('/questions/fetchBulk', payload);
   return response.data;
 };
+
+export const deleteQuestionsBulkApi = async (payload: any) => {
+  const response = await axios.delete('/questions/bulk', payload);
+  return response.data;
+};

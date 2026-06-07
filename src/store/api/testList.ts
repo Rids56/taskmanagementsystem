@@ -19,3 +19,8 @@ export const updateTestApi = async (id: string, payload: any) => {
   const response = await axios.put(`/tests/${id}`, payload);
   return response.data;
 };
+
+export const deleteTestApi = async (id: string, payload: any) => {
+  const response = await axios.delete(`/tests/${id}`, payload);
+  return response.data;
+};

@@ -23,6 +23,7 @@ import {
   getTestByIdRequest,
   createTestRequest,
   updateTestRequest,
+  resetTestList,
 } from '../../store/slices/testListSlice';
 import { getSubjectsRequest } from '../../store/slices/subjectSlice';
 import { getTopicsRequest } from '../../store/slices/topicSlice';
@@ -38,6 +39,7 @@ import {
   taskCreateSchema as FormSchema,
 } from './model/create.schema';
 import DifficultyRadio from '../../components/DifficultyRadio';
+import { isEmpty } from 'lodash';
 
 export default function TaskCreate() {
   const dispatch = useDispatch();
@@ -52,7 +54,17 @@ export default function TaskCreate() {
 
   // Selectors
   const {
-    getOne: { selected: getOnesuccessTest, loading, error },
+    getOne: {
+      selected: getOneTestSuccess,
+      loading: getOneTestLoader,
+      error: getOneTestError,
+    },
+    add: { data: addTestSuccess, loading: addTestLoader, error: addTestError },
+    edit: {
+      data: editTestSuccess,
+      loading: editTestLoader,
+      error: editTestError,
+    },
   } = useSelector((state: RootState) => state.testList);
   const { data: subjects, loading: subjectLoader } = useSelector(
     (state: RootState) => state.subjects
@@ -66,9 +78,15 @@ export default function TaskCreate() {
 
   // States
   const rowDataRef = useRef<any>(null);
-  const [pendingSave, setPendingSave] = useState(false);
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMsg, setSnackbarMsg] = useState('');
+  const [snackbar, setSnackbar] = useState<{
+    isOpen: boolean;
+    mode: 'success' | 'error' | 'info' | 'warning';
+    msg: string;
+  }>({
+    isOpen: false,
+    mode: 'success',
+    msg: '',
+  });
 
   const formContext = useForm({
     resolver: zodResolver(FormSchema),
@@ -113,20 +131,24 @@ export default function TaskCreate() {
     if (isEditMode && editId) {
       dispatch(getTestByIdRequest(editId));
     }
+
+    return (): void => {
+      dispatch(resetTestList());
+    };
   }, [isEditMode, editId]);
 
   // Get topics in edit mode
   useEffect(() => {
-    if (!isEditMode || !getOnesuccessTest || subjects?.length === 0) return;
+    if (!isEditMode || !getOneTestSuccess || subjects?.length === 0) return;
 
     const selectedSubject = subjects.find(
-      (s) => s.name === getOnesuccessTest.subject
+      (s) => s.name === getOneTestSuccess.subject
     );
 
     if (!selectedSubject) return;
 
     dispatch(getTopicsRequest(selectedSubject.id));
-  }, [isEditMode, getOnesuccessTest, subjects, dispatch]);
+  }, [isEditMode, getOneTestSuccess, subjects, dispatch]);
 
   // Get topics in create mode
   useEffect(() => {
@@ -136,10 +158,10 @@ export default function TaskCreate() {
 
   // Get multi sub-topics in edit mode
   useEffect(() => {
-    if (!isEditMode || !getOnesuccessTest || topics?.length === 0) return;
+    if (!isEditMode || !getOneTestSuccess || topics?.length === 0) return;
 
     const selectedTopics = topics.filter((topic) =>
-      getOnesuccessTest.topics?.includes(topic.name)
+      getOneTestSuccess.topics?.includes(topic.name)
     );
 
     const topicIds = selectedTopics.map((t) => t.id);
@@ -147,7 +169,7 @@ export default function TaskCreate() {
     if (topicIds.length) {
       dispatch(getMultiSubTopicsRequest(topicIds));
     }
-  }, [isEditMode, getOnesuccessTest, topics, dispatch]);
+  }, [isEditMode, getOneTestSuccess, topics, dispatch]);
 
   // Get multi sub-topics in create mode
   useEffect(() => {
@@ -168,84 +190,104 @@ export default function TaskCreate() {
 
   // After subjects,topics,sub-topics get
   useEffect(() => {
-    if (!isEditMode || !getOnesuccessTest) return;
+    if (!isEditMode || !getOneTestSuccess) return;
 
     // Check if we have all necessary data loaded
     const hasAllData = subjects?.length && topics?.length;
     if (!hasAllData) return;
 
-    hydrateEditForm(getOnesuccessTest);
-  }, [isEditMode, getOnesuccessTest, subjects, topics, subTopics]);
+    hydrateEditForm(getOneTestSuccess);
+  }, [isEditMode, getOneTestSuccess, subjects, topics, subTopics]);
 
-  // Handle create test result: navigate on success, show toast on failure
   useEffect(() => {
-    if (!pendingSave) return;
-
-    // still waiting for API
-    if (loading) return;
-
-    if (error) {
-      let message = '';
-      if (typeof error === 'string') message = error;
-      else if (error?.errors && Array.isArray(error.errors)) {
-        message = error.errors.map((e: any) => e.msg).join('; ');
-      } else if (error?.message) message = error.message;
-      else message = JSON.stringify(error);
-
-      setSnackbarMsg(message);
-      setSnackbarOpen(true);
-      setPendingSave(false);
-      return;
+    if (!isEmpty(getOneTestSuccess)) {
+      setSnackbar({
+        isOpen: true,
+        mode: 'success',
+        msg: `Test fetch Successfully`,
+      });
     }
 
-    // success
-    if (!loading && !error && getOnesuccessTest) {
-      // if (isEditMode) {
-      //   navigate(returnTo ?? '/dashboard', {
-      //     state: { rowData: rowDataRef.current },
-      //   });
-      // } else {
+    if (getOneTestError) {
+      setSnackbar({
+        isOpen: true,
+        mode: 'error',
+        msg: getOneTestError?.message ?? 'Api failed',
+      });
+    }
+  }, [getOneTestSuccess, getOneTestError]);
+
+  useEffect(() => {
+    if (!isEmpty(addTestSuccess)) {
+      setSnackbar({
+        isOpen: true,
+        mode: 'success',
+        msg: `Test Created Successfully`,
+      });
+
+      navigate('/task-create/add-question', {
+        state: {
+          rowData: { ...rowDataRef.current, id: addTestSuccess?.[0]?.id },
+        },
+      });
+    }
+
+    if (addTestError) {
+      setSnackbar({
+        isOpen: true,
+        mode: 'error',
+        msg: addTestError?.message ?? 'Api failed',
+      });
+    }
+  }, [addTestSuccess, addTestError]);
+
+  useEffect(() => {
+    if (!isEmpty(editTestSuccess)) {
+      setSnackbar({
+        isOpen: true,
+        mode: 'success',
+        msg: `Test updated successfully`,
+      });
+
       navigate('/task-create/add-question', {
         state: { rowData: rowDataRef.current },
       });
-      // }
-      setPendingSave(false);
     }
-  }, [
-    loading,
-    error,
-    getOnesuccessTest,
-    pendingSave,
-    navigate,
-    isEditMode,
-    returnTo,
-  ]);
 
-  const hydrateEditForm = (getOnesuccessTest: any) => {
+    if (editTestError) {
+      setSnackbar({
+        isOpen: true,
+        mode: 'error',
+        msg: editTestError?.message ?? 'Api failed',
+      });
+    }
+  }, [editTestSuccess, editTestError]);
+
+  const hydrateEditForm = (getOneTestSuccess: any) => {
     // Validate that we have all necessary data
-    if (!getOnesuccessTest || !subjects?.length) return;
+    if (!getOneTestSuccess || !subjects?.length) return;
 
     // 1. Subject - API returns subject as string (name only), find the object
     const selectedSubject = subjects.find(
-      (subject) => subject.name === getOnesuccessTest.subject
+      (subject) => subject.name === getOneTestSuccess.subject
     );
 
     if (!selectedSubject) {
-      console.warn('Subject not found:', getOnesuccessTest.subject);
+      console.warn('Subject not found:', getOneTestSuccess.subject);
       return;
     }
 
     // 2. Topics - API returns topics as array of strings (names only), match with fetched data
-    const topicNames = Array.isArray(getOnesuccessTest.topics)
-      ? getOnesuccessTest.topics
+    const topicNames = Array.isArray(getOneTestSuccess.topics)
+      ? getOneTestSuccess.topics
       : [];
     const selectedTopics = topics.filter((topic: any) =>
       topicNames.includes(topic.name)
     );
 
     // 3. SubTopics - API returns sub_topics as array of strings (names only), match with fetched data
-    const subTopicNames = Array.isArray(getOnesuccessTest.sub_topics)
-      ? getOnesuccessTest.sub_topics
+    const subTopicNames = Array.isArray(getOneTestSuccess.sub_topics)
+      ? getOneTestSuccess.sub_topics
       : [];
     const selectedSubTopics = (subTopics || []).filter((subTopic: any) =>
       subTopicNames.includes(subTopic.name)
@@ -253,7 +295,7 @@ export default function TaskCreate() {
 
     // 4. Populate form with proper structure
     const formData = {
-      ...getOnesuccessTest,
+      ...getOneTestSuccess,
 
       subject: selectedSubject
         ? {
@@ -281,13 +323,16 @@ export default function TaskCreate() {
   const onSubmit = async (data: IFormInput) => {
     if (Object.keys(errors).length === 0) {
       rowDataRef.current = data;
-      setPendingSave(true);
+      // setPendingSave(true);
       const dirtyData = getDirtyValues(data, dirtyFields);
 
       if (Object.keys(dirtyData).length === 0) {
-        setSnackbarMsg('No fields to update');
-        setSnackbarOpen(true);
-        setPendingSave(false);
+        setSnackbar({
+          isOpen: true,
+          mode: 'error',
+          msg: 'No fields to update',
+        });
+        // setPendingSave(false);
         return;
       }
 
@@ -347,7 +392,8 @@ export default function TaskCreate() {
     [subTopics]
   );
 
-  const showLoader = isEditMode && loading;
+  const showLoader =
+    isEditMode && (getOneTestLoader || addTestLoader || editTestLoader);
 
   return (
     <FormProvider {...formContext}>
@@ -692,8 +738,9 @@ export default function TaskCreate() {
                             <Button
                               variant="outlined"
                               onClick={() => {
+                                const rowData = getValues();
                                 navigate('/task-create/add-question', {
-                                  state: { rowData: getValues() },
+                                  state: { rowData },
                                 });
                               }}
                             >
@@ -712,17 +759,29 @@ export default function TaskCreate() {
           </LoaderOverlay>
         </Paper>
         <Snackbar
-          open={snackbarOpen}
+          open={snackbar?.isOpen}
           autoHideDuration={6000}
-          onClose={() => setSnackbarOpen(false)}
+          onClose={() =>
+            setSnackbar({
+              isOpen: false,
+              mode: 'success',
+              msg: '',
+            })
+          }
           anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
         >
           <Alert
-            onClose={() => setSnackbarOpen(false)}
-            severity="error"
+            onClose={() =>
+              setSnackbar({
+                isOpen: false,
+                mode: 'success',
+                msg: '',
+              })
+            }
+            severity={snackbar?.mode}
             sx={{ width: '100%' }}
           >
-            {snackbarMsg}
+            {snackbar?.msg}
           </Alert>
         </Snackbar>
       </Box>

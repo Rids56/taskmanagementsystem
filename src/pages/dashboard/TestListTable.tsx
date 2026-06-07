@@ -1,5 +1,13 @@
-import { useEffect, useMemo } from 'react';
-import { Box, Chip, IconButton, Paper, Tooltip } from '@mui/material';
+import { useEffect, useMemo, useState } from 'react';
+import {
+  Alert,
+  Box,
+  Chip,
+  IconButton,
+  Paper,
+  Snackbar,
+  Tooltip,
+} from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
@@ -11,6 +19,7 @@ import { useNavigate } from 'react-router-dom';
 import { TestList } from '../interfaceType';
 import { RootState } from '@/src/store/store';
 import {
+  deleteTestRequest,
   getTestListRequest,
   resetTestList,
 } from '../../store/slices/testListSlice';
@@ -18,20 +27,25 @@ import {
 export default function TestListTable() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [snackbar, setSnackbar] = useState<{
+    isOpen: boolean;
+    mode: 'success' | 'error' | 'info' | 'warning';
+    msg: string;
+  }>({
+    isOpen: false,
+    mode: 'success',
+    msg: '',
+  });
   const {
     get: { data: testListData, loading: testListLoader },
+    delete: {
+      selected: testDeleteSuccess,
+      loading: testDeleteLoader,
+      error: testDeleteError,
+    },
   } = useSelector((state: RootState) => state?.testList ?? []);
 
-  useEffect(() => {
-    dispatch(getTestListRequest());
-
-    return (): void => {
-      dispatch(resetTestList());
-    };
-  }, []);
-
   const data = useMemo<TestList[]>(() => testListData ?? [], [testListData]);
-
   const columns = useMemo<MRT_ColumnDef<TestList>[]>(
     () => [
       {
@@ -148,7 +162,7 @@ export default function TestListTable() {
               <IconButton
                 size="small"
                 color="error"
-                onClick={() => console.log('Delete', row.original)}
+                onClick={() => handleDeleteTest(row?.original)}
               >
                 <DeleteOutlineOutlinedIcon fontSize="small" />
               </IconButton>
@@ -159,6 +173,43 @@ export default function TestListTable() {
     ],
     []
   );
+
+  useEffect(() => {
+    dispatch(getTestListRequest());
+
+    return (): void => {
+      dispatch(resetTestList());
+    };
+  }, []);
+
+  useEffect(() => {
+    if (testDeleteSuccess) {
+      setSnackbar({
+        isOpen: true,
+        mode: 'success',
+        msg: testDeleteSuccess?.message ?? 'Test Successfully Deleted.',
+      });
+
+      dispatch(getTestListRequest());
+    }
+
+    if (testDeleteError) {
+      setSnackbar({
+        isOpen: true,
+        mode: 'error',
+        msg: testDeleteError?.message ?? 'upadate failed',
+      });
+    }
+  }, [testDeleteSuccess, testDeleteError]);
+
+  const handleDeleteTest = (data: TestList) => {
+    if (data?.id)
+      dispatch(
+        deleteTestRequest({
+          id: data?.id,
+        })
+      );
+  };
 
   return (
     <Paper
@@ -189,7 +240,7 @@ export default function TestListTable() {
           columnPinning: { right: ['actions'] },
         }}
         state={{
-          isLoading: testListLoader,
+          isLoading: testListLoader || testDeleteLoader,
         }}
         muiTablePaperProps={{
           elevation: 0,
@@ -202,6 +253,32 @@ export default function TestListTable() {
           },
         }}
       />
+      <Snackbar
+        open={snackbar?.isOpen}
+        autoHideDuration={6000}
+        onClose={() =>
+          setSnackbar({
+            isOpen: false,
+            mode: 'success',
+            msg: '',
+          })
+        }
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={() =>
+            setSnackbar({
+              isOpen: false,
+              mode: 'success',
+              msg: '',
+            })
+          }
+          severity={snackbar?.mode}
+          sx={{ width: '100%' }}
+        >
+          {snackbar?.msg}
+        </Alert>
+      </Snackbar>
     </Paper>
   );
 }

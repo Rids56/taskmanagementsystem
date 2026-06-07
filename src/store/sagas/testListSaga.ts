@@ -4,6 +4,7 @@ import {
   getTestByIdApi,
   createTestApi,
   updateTestApi,
+  deleteTestApi,
 } from '../api/testList';
 import {
   getTestListRequest,
@@ -18,6 +19,9 @@ import {
   updateTestRequest,
   updateTestSuccess,
   updateTestFailure,
+  deleteTestRequest,
+  deleteTestSuccess,
+  deleteTestFailure,
 } from '../slices/testListSlice';
 
 function* getTestListWorker(): Generator<any, void, any> {
@@ -79,9 +83,26 @@ function* updateTestWorker(
   }
 }
 
+function* deleteTestWorker(
+  action: ReturnType<typeof deleteTestRequest>
+): Generator<any, void, any> {
+  try {
+    const { id, payload } = action.payload;
+    const response = yield call(deleteTestApi, id, payload);
+    yield put(deleteTestSuccess(response.data ?? response));
+  } catch (error: any) {
+    yield put(
+      deleteTestFailure(
+        error?.response?.data ?? { message: 'Failed to delete test' }
+      )
+    );
+  }
+}
+
 export function* testListSaga() {
   yield takeLatest(getTestListRequest.type, getTestListWorker);
   yield takeLatest(getTestByIdRequest.type, getTestByIdWorker);
   yield takeLatest(createTestRequest.type, createTestWorker);
   yield takeLatest(updateTestRequest.type, updateTestWorker);
+  yield takeLatest(deleteTestRequest.type, deleteTestWorker);
 }

@@ -16,7 +16,7 @@ import {
 
 import { Controller, useFormContext, useFormState } from 'react-hook-form';
 import type { AddQuestionFormValues as IFormInput } from './model/addQuestion.schema';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 interface AddQuestionFormProps {
   onAddAnother: (values: IFormInput) => void;
@@ -38,9 +38,13 @@ const AddQuestionForm = ({
   totalQuestions,
 }: AddQuestionFormProps) => {
   const location = useLocation();
-  const rowData = location.state?.rowData;
+  const navigate = useNavigate();
 
-  const { control, register, handleSubmit } = useFormContext<IFormInput>();
+  const rowData = location.state?.rowData;
+  const returnTo = location.state?.returnTo;
+
+  const { control, register, handleSubmit, getValues } =
+    useFormContext<IFormInput>();
   const { errors } = useFormState({
     control,
   });
@@ -48,9 +52,14 @@ const AddQuestionForm = ({
   const topicOptions = rowData?.topics ?? [];
   const subTopicOptions = rowData?.sub_topics ?? [];
 
+  const questionId = getValues('id');
+  const isExistingQuestion = !!questionId && questionId !== 'temp_id';
+  const canDelete =
+    isExistingQuestion || (rowData?.questions?.length ?? 0) >= questionNumber;
+
   return (
     <>
-      <Grid container spacing={3} key={rowData?.id + Date.now()}>
+      <Grid container spacing={3} key={rowData?.id}>
         <Grid size={{ xs: 12, md: 6 }}>
           <Typography variant="h5" sx={{ mt: 1, fontWeight: 700 }}>
             Question {questionNumber}/{totalQuestions}
@@ -95,10 +104,7 @@ const AddQuestionForm = ({
               startIcon={<DeleteOutlineOutlined />}
               sx={{ textTransform: 'none' }}
               onClick={handleSubmit(onDelete)}
-              disabled={
-                !rowData?.questions?.length ||
-                rowData?.questions?.length < questionNumber
-              }
+              disabled={!canDelete}
             >
               Delete Question
             </Button>
@@ -156,6 +162,7 @@ const AddQuestionForm = ({
                 select
                 fullWidth
                 label="Correct Option"
+                {...register('correct_option')}
                 error={!!errors.correct_option}
                 helperText={errors.correct_option?.message}
                 {...field}
@@ -202,6 +209,7 @@ const AddQuestionForm = ({
               <TextField
                 select
                 fullWidth
+                {...register('difficulty')}
                 label="Level Of Difficulty"
                 error={!!errors.difficulty}
                 helperText={errors.difficulty?.message}
@@ -275,7 +283,12 @@ const AddQuestionForm = ({
           <Button
             variant="outlined"
             color="warning"
-            onClick={onClear}
+            // onClick={onClear}
+            onClick={() => {
+              if (returnTo) {
+                navigate(returnTo);
+              } else navigate(-1);
+            }}
             disabled={!hasQuestions}
           >
             Exit Test Creation

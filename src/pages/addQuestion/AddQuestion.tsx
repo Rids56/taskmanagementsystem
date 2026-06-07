@@ -19,13 +19,14 @@ import {
   addQuestionSchema as FormSchema,
   AddQuestionFormValues as IFormInput,
 } from './model/addQuestion.schema';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAppDispatch } from '../../hooks';
 import {
   getQuestionsRequest,
   createQuestionsRequest,
   resetQuestions,
   updateQuestionsRequest,
+  deleteQuestionsRequest,
 } from '../../store/slices/questionSlice';
 import TestInfoCard from './TestInfoCard';
 import { RootState } from '../../store/store';
@@ -35,7 +36,7 @@ import { getDirtyValues } from '../../utils/getDirtyValues';
 
 export default function AddQuestion() {
   const dispatch = useAppDispatch();
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
   const location = useLocation();
   const rowData = location.state?.rowData;
 
@@ -106,6 +107,11 @@ export default function AddQuestion() {
       // loading: getQuestionsLoader,
       error: getQuestionsError,
     },
+    delete: {
+      data: deleteQuestionsSuccess,
+      // loading: deleteQuestionsLoader,
+      error: deleteQuestionsError,
+    },
   } = useSelector((state: RootState) => state.question);
 
   useEffect(() => {
@@ -121,6 +127,7 @@ export default function AddQuestion() {
       );
     }
     return (): void => {
+      // reset({ ...initialValues });
       dispatch(resetQuestions());
     };
   }, [activeQuestionIndex]);
@@ -202,6 +209,24 @@ export default function AddQuestion() {
     }
   }, [editQuestionsSuccess, editQuestionsError]);
 
+  useEffect(() => {
+    if (!isEmpty(deleteQuestionsSuccess)) {
+      setSnackbar({
+        isOpen: true,
+        mode: 'success',
+        msg: `Successfully deleted ${deleteQuestionsSuccess?.length > 1 ? 'Questions' : 'Question'}`,
+      });
+    }
+
+    if (deleteQuestionsError) {
+      setSnackbar({
+        isOpen: true,
+        mode: 'error',
+        msg: deleteQuestionsError?.message ?? 'delete failed',
+      });
+    }
+  }, [deleteQuestionsSuccess, deleteQuestionsError]);
+
   const onSubmit = (data: IFormInput) => {
     const dirtyData = getDirtyValues(data, dirtyFields);
     if (Object.keys(dirtyData).length === 0) {
@@ -225,13 +250,17 @@ export default function AddQuestion() {
           topic:
             typeof dirtyData.topic === 'object'
               ? dirtyData.topic.id
-              : dirtyData.topic,
+              : dirtyData.topic == null
+                ? ''
+                : dirtyData.topic,
         }),
         ...(dirtyData.sub_topic && {
           sub_topic:
             typeof dirtyData.sub_topic === 'object'
               ? dirtyData.sub_topic.id
-              : dirtyData.sub_topic,
+              : dirtyData.sub_topic == null
+                ? ''
+                : dirtyData.sub_topic,
         }),
       };
 
@@ -245,11 +274,15 @@ export default function AddQuestion() {
       topic:
         data.topic && typeof data.topic === 'object'
           ? data.topic.id
-          : data.topic,
+          : data.topic == null
+            ? ''
+            : data.topic,
       sub_topic:
         data.sub_topic && typeof data.sub_topic === 'object'
           ? data.sub_topic.id
-          : data.sub_topic,
+          : data.sub_topic == null
+            ? ''
+            : data.sub_topic,
     };
     dispatch(createQuestionsRequest({ questions: [createPayload] }));
   };
@@ -279,7 +312,7 @@ export default function AddQuestion() {
 
   const handleNext = (_data: IFormInput) => {
     // onSubmit(data);
-    // reset({...initialValues});
+    reset({ ...initialValues });
 
     if (
       activeQuestionIndex !== null &&
@@ -289,20 +322,17 @@ export default function AddQuestion() {
     }
   };
 
-  const handleQuestionSelect = (question: any, index: number) => {
-    if (question === 'temp_id') reset({ ...initialValues });
+  const handleQuestionSelect = (_question: any, index: number) => {
+    reset({ ...initialValues });
+    // if (question === 'temp_id') reset({ ...initialValues });
     setActiveQuestionIndex(index);
   };
 
-  // const handleClearQuestions = () => {
-  //   setQuestions([]);
-  //   setActiveQuestionIndex(null);
-  //   reset({ ...initialValues });
-
-  //   navigate(-1);
-  // };
   const handleClearQuestions = () => {
-    if (activeQuestionIndex === null) return;
+    if (activeQuestionIndex === null) {
+      navigate(-1);
+      return;
+    }
 
     const isExistingQuestion = questions[activeQuestionIndex];
     const isNewQuestion =
@@ -345,6 +375,9 @@ export default function AddQuestion() {
             (option: any) => option.name === data.sub_topic
           ) ?? null,
       });
+    } else {
+      // api issue : Deleted question have [] data without remove from questions[ids..] in testlist
+      reset({ ...initialValues });
     }
 
     // OR if you keep original API data separately:
@@ -363,7 +396,7 @@ export default function AddQuestion() {
       data?.id && (data.id !== 'temp_id' || data?.id == null);
     if (isExistingQuestion && questions[currentQuestionNumber - 1] === data?.id)
       dispatch(
-        getQuestionsRequest({
+        deleteQuestionsRequest({
           question_ids: [data?.id],
         })
       );

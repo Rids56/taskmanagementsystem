@@ -32,6 +32,11 @@ interface QuestionState {
     loading: boolean;
     error: any | null;
   };
+  delete: {
+    data: QuestionItem[];
+    loading: boolean;
+    error: any | null;
+  };
 }
 
 const initialState: QuestionState = {
@@ -46,6 +51,11 @@ const initialState: QuestionState = {
     error: null,
   },
   get: {
+    data: [],
+    loading: false,
+    error: null,
+  },
+  delete: {
     data: [],
     loading: false,
     error: null,
@@ -92,6 +102,18 @@ const questionSlice = createSlice({
       state.get.loading = false;
       state.get.error = action.payload;
     },
+    deleteQuestionsRequest: (state, _action: PayloadAction<any>) => {
+      state.delete.loading = true;
+      state.delete.error = null;
+    },
+    deleteQuestionsSuccess: (state, action: PayloadAction<QuestionItem[]>) => {
+      state.delete.loading = false;
+      state.delete.data = action.payload;
+    },
+    deleteQuestionsFailure: (state, action: PayloadAction<any>) => {
+      state.delete.loading = false;
+      state.delete.error = action.payload;
+    },
     resetQuestions: () => initialState,
   },
 });
@@ -106,6 +128,9 @@ export const {
   getQuestionsRequest,
   getQuestionsSuccess,
   getQuestionsFailure,
+  deleteQuestionsRequest,
+  deleteQuestionsSuccess,
+  deleteQuestionsFailure,
   resetQuestions,
 } = questionSlice.actions;
 

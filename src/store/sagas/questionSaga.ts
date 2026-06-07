@@ -3,6 +3,7 @@ import {
   createQuestionsBulkApi,
   updateQuestionsBulkApi,
   getQuestionsBulkApi,
+  deleteQuestionsBulkApi,
 } from '../api/questionApi';
 import {
   createQuestionsFailure,
@@ -14,6 +15,9 @@ import {
   getQuestionsFailure,
   getQuestionsRequest,
   getQuestionsSuccess,
+  deleteQuestionsFailure,
+  deleteQuestionsRequest,
+  deleteQuestionsSuccess,
 } from '../slices/questionSlice';
 
 function* createQuestionsWorker(
@@ -61,8 +65,24 @@ function* getQuestionsWorker(
   }
 }
 
+function* deleteQuestionsWorker(
+  action: ReturnType<typeof deleteQuestionsRequest>
+): Generator<any, void, any> {
+  try {
+    const response = yield call(deleteQuestionsBulkApi, action.payload);
+    yield put(deleteQuestionsSuccess(response.data ?? response));
+  } catch (error: any) {
+    yield put(
+      deleteQuestionsFailure(
+        error?.response?.data ?? { message: 'Failed to delete questions' }
+      )
+    );
+  }
+}
+
 export function* questionSaga() {
   yield takeLatest(createQuestionsRequest.type, createQuestionsWorker);
   yield takeLatest(updateQuestionsRequest.type, updateQuestionsWorker);
   yield takeLatest(getQuestionsRequest.type, getQuestionsWorker);
+  yield takeLatest(deleteQuestionsRequest.type, deleteQuestionsWorker);
 }
