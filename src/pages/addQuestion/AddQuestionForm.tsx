@@ -286,7 +286,12 @@ const AddQuestionForm = ({
             // onClick={onClear}
             onClick={() => {
               if (returnTo) {
-                navigate(returnTo);
+                navigate(returnTo, {
+                  state: {
+                    ...(location.state.mode && { mode: location.state.mode }),
+                    id: rowData?.id,
+                  },
+                });
               } else navigate(-1);
             }}
             disabled={!hasQuestions}

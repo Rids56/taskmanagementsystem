@@ -96,6 +96,12 @@ const appTheme = createTheme({
           borderRadius: 12,
           textTransform: 'none',
         },
+        contained: {
+          backgroundColor: '#7389ff',
+          '&:hover': {
+            backgroundColor: '#5f77ff',
+          },
+        },
       },
     },
     MuiCard: {

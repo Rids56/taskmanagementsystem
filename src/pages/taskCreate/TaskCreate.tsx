@@ -227,7 +227,9 @@ export default function TaskCreate() {
 
       navigate('/task-create/add-question', {
         state: {
+          ...(location.state.mode && { mode: location.state.mode }),
           rowData: { ...rowDataRef.current, id: addTestSuccess?.[0]?.id },
+          id: addTestSuccess?.[0]?.id,
         },
       });
     }
@@ -250,7 +252,11 @@ export default function TaskCreate() {
       });
 
       navigate('/task-create/add-question', {
-        state: { rowData: rowDataRef.current },
+        state: {
+          ...(location.state.mode && { mode: location.state.mode }),
+          rowData: rowDataRef.current,
+          id: rowDataRef.current?.id,
+        },
       });
     }
 
@@ -706,7 +712,13 @@ export default function TaskCreate() {
                           onClick={() => {
                             const rowData = getValues();
                             navigate('/task-create/add-question', {
-                              state: { rowData },
+                              state: {
+                                ...(location.state.mode && {
+                                  mode: location.state.mode,
+                                }),
+                                rowData,
+                                id: rowData?.id,
+                              },
                             });
                           }}
                         >
@@ -740,7 +752,13 @@ export default function TaskCreate() {
                               onClick={() => {
                                 const rowData = getValues();
                                 navigate('/task-create/add-question', {
-                                  state: { rowData },
+                                  state: {
+                                    ...(location.state.mode && {
+                                      mode: location.state.mode,
+                                    }),
+                                    rowData,
+                                    id: rowData?.id,
+                                  },
                                 });
                               }}
                             >

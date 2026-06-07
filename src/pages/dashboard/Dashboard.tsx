@@ -25,7 +25,13 @@ export default function Dashboard() {
         <Button
           variant="contained"
           startIcon={<AddIcon />}
-          onClick={() => navigate('/task-create')}
+          onClick={() =>
+            navigate('/task-create', {
+              state: {
+                returnTo: '/dashboard',
+              },
+            })
+          }
           sx={{ minWidth: 180 }}
         >
           Create New Test

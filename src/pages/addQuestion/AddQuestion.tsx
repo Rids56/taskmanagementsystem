@@ -2,6 +2,7 @@ import {
   Alert,
   Box,
   Breadcrumbs,
+  Button,
   Paper,
   Snackbar,
   Typography,
@@ -33,6 +34,8 @@ import { RootState } from '../../store/store';
 import { useSelector } from 'react-redux';
 import { isEmpty } from 'lodash';
 import { getDirtyValues } from '../../utils/getDirtyValues';
+import PublishTestPage from './PublishTestPage';
+import { CheckCircle } from '@mui/icons-material';
 
 export default function AddQuestion() {
   const dispatch = useAppDispatch();
@@ -47,6 +50,9 @@ export default function AddQuestion() {
   const topicOptions = rowData?.topics ?? [];
   const subTopicOptions = rowData?.sub_topics ?? [];
 
+  const [pageMode, setPageMode] = useState<'questions' | 'publish'>(
+    'questions'
+  );
   const [questions, setQuestions] = useState<any[]>(defaultQuestions);
   const [activeQuestionIndex, setActiveQuestionIndex] = useState<number | null>(
     defaultQuestions.length ? 0 : null
@@ -165,21 +171,18 @@ export default function AddQuestion() {
       });
 
       setQuestions((prev) => {
-        if (prev)
-          if (
-            activeQuestionIndex !== null &&
-            activeQuestionIndex < prev.length
-          ) {
-            const updated = [...prev];
-            updated[activeQuestionIndex] = addQuestionsSuccess?.[0]?.id;
-            return updated;
-          }
-
-        setActiveQuestionIndex(prev.length);
-        return [...prev, addQuestionsSuccess?.[0]?.id];
+        let updated;
+        if (activeQuestionIndex !== null && activeQuestionIndex < prev.length) {
+          updated = [...prev];
+          updated[activeQuestionIndex] = addQuestionsSuccess?.[0]?.id;
+        } else {
+          updated = [...prev, addQuestionsSuccess?.[0]?.id];
+        }
+        updated.push('temp_id');
+        setActiveQuestionIndex(updated.length - 1);
+        reset({ ...initialValues });
+        return updated;
       });
-
-      handleAddAnotherQuestion();
     }
 
     if (addQuestionsError) {
@@ -408,14 +411,24 @@ export default function AddQuestion() {
       ? activeQuestionIndex + 1
       : questions.length + 1;
 
+  const handlePublish = () => {
+    setPageMode('publish');
+  };
+
   return (
     <FormProvider {...formContext}>
       <Box>
-        <Breadcrumbs sx={{ mb: 4 }}>
-          <Typography>Test Creation</Typography>
-          <Typography>Create Test</Typography>
-          <Typography color="primary">Add Questions</Typography>
-        </Breadcrumbs>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1 }}>
+          <Breadcrumbs sx={{ mb: 4 }}>
+            <Typography>Test Creation</Typography>
+            <Typography>Create Test</Typography>
+            <Typography color="primary">Add Questions</Typography>
+          </Breadcrumbs>
+
+          <Button variant="contained" onClick={handlePublish}>
+            Publish
+          </Button>
+        </Box>
 
         <Box
           sx={{
@@ -518,19 +531,65 @@ export default function AddQuestion() {
               borderRadius: 1,
             }}
           >
+            {pageMode === 'publish' && (
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 2,
+                  mb: 3,
+                  flexWrap: 'wrap',
+                }}
+              >
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontWeight: 700,
+                    mb: 0,
+                  }}
+                >
+                  Test Created
+                </Typography>
+
+                <Button
+                  color="success"
+                  variant="outlined"
+                  startIcon={<CheckCircle />}
+                  sx={{
+                    textTransform: 'none',
+                    borderColor: '#9EE2BE',
+                    bgcolor: '#F3FFF8',
+                    px: 3,
+                    py: 1,
+                    borderRadius: 3,
+                    width: 'auto',
+                  }}
+                >
+                  {`All ${totalQuestions} Questions Done`}
+                </Button>
+              </Box>
+            )}
+
             <TestInfoCard rowData={rowData} />
 
-            <Box component="form" onSubmit={handleSubmit(handleSaveContinue)}>
-              <AddQuestionForm
-                onNext={handleNext}
-                onAddAnother={handleAddAnotherQuestion}
-                onClear={handleClearQuestions}
-                onDelete={handleDeleteQuestions}
-                hasQuestions={questions.length > 0}
-                questionNumber={currentQuestionNumber}
-                totalQuestions={totalQuestions}
+            {pageMode === 'publish' ? (
+              <PublishTestPage
+                rowData={rowData}
+                onCancel={() => setPageMode('questions')}
               />
-            </Box>
+            ) : (
+              <Box component="form" onSubmit={handleSubmit(handleSaveContinue)}>
+                <AddQuestionForm
+                  onNext={handleNext}
+                  onAddAnother={handleAddAnotherQuestion}
+                  onClear={handleClearQuestions}
+                  onDelete={handleDeleteQuestions}
+                  hasQuestions={questions.length > 0}
+                  questionNumber={currentQuestionNumber}
+                  totalQuestions={totalQuestions}
+                />
+              </Box>
+            )}
           </Paper>
         </Box>
 
