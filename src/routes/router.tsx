@@ -46,7 +46,7 @@ const router = createBrowserRouter([
             element: <TaskCreate />,
           },
           {
-            path: '/add-question',
+            path: '/task-create/add-question',
             element: <AddQuestion />,
           },
         ],

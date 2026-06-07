@@ -7,14 +7,15 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
-
+import startCase from 'lodash/startCase';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined';
 import QuizOutlinedIcon from '@mui/icons-material/QuizOutlined';
 import AssessmentOutlinedIcon from '@mui/icons-material/AssessmentOutlined';
-import SchoolOutlinedIcon from '@mui/icons-material/SchoolOutlined';
 import { useNavigate } from 'react-router-dom';
 import { TopicOption } from '../interfaceType';
+import IconChapter from '../../assets/ar_stickers.png';
+import IconLevel from '../../assets/cognition.png';
 
 interface TestInfoCardProps {
   rowData: any;
@@ -48,8 +49,8 @@ export default function TestInfoCard({ rowData }: TestInfoCardProps) {
             state: {
               mode: 'edit',
               // rowData: rowData,
-              id: rowData.id,
-              returnTo: '/add-question',
+              id: rowData?.id,
+              returnTo: '/task-create/add-question',
             },
           })
         }
@@ -59,7 +60,7 @@ export default function TestInfoCard({ rowData }: TestInfoCardProps) {
 
       {/* Test Type */}
       <Chip
-        label={rowData?.type ?? 'Chapter Wise'}
+        label={startCase(rowData?.type) ?? 'Chapter Wise'}
         sx={{
           mb: 3,
           bgcolor: '#09104D',
@@ -70,18 +71,30 @@ export default function TestInfoCard({ rowData }: TestInfoCardProps) {
 
       {/* Header */}
       <Stack direction="row" spacing={2} sx={{ mb: 4 }}>
-        <SchoolOutlinedIcon color="primary" sx={{ fontSize: 32 }} />
+        <Box
+          sx={{ objectFit: 'scale-down' }}
+          component="img"
+          src={IconChapter}
+        ></Box>
 
         <Typography sx={{ fontWeight: 700 }} variant="h4">
           {rowData?.name}
         </Typography>
 
         <Chip
-          label={rowData?.difficulty}
-          color="success"
+          icon={
+            <Box
+              component="img"
+              src={IconLevel}
+              alt="Difficulty"
+              sx={{ objectFit: 'scale-down' }}
+            />
+          }
+          label={startCase(rowData?.difficulty)}
           sx={{
             borderRadius: 2,
             minWidth: 100,
+            bgcolor: '#2AB7A9',
           }}
         />
       </Stack>

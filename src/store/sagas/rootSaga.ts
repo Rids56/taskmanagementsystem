@@ -3,8 +3,15 @@ import { subjectSaga } from './subjectSaga';
 import { topicSaga } from './topicSaga';
 import { subTopicSaga } from './subTopicSaga';
 import { testListSaga } from './testListSaga';
+import { questionSaga } from './questionSaga';
 
 // rootSaga combines (merges) all sagas in one place
 export default function* rootSaga() {
-  yield all([subjectSaga(), topicSaga(), subTopicSaga(), testListSaga()]);
+  yield all([
+    subjectSaga(),
+    topicSaga(),
+    subTopicSaga(),
+    testListSaga(),
+    questionSaga(),
+  ]);
 }

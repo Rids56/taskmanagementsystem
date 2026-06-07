@@ -18,9 +18,9 @@ import {
 export default function TestListTable() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { data: testListData, loading: testListLoader } = useSelector(
-    (state: RootState) => state?.testList ?? []
-  );
+  const {
+    get: { data: testListData, loading: testListLoader },
+  } = useSelector((state: RootState) => state?.testList ?? []);
 
   useEffect(() => {
     dispatch(getTestListRequest());
@@ -184,7 +184,7 @@ export default function TestListTable() {
         initialState={{
           pagination: {
             pageIndex: 0,
-            pageSize: 10,
+            pageSize: 100,
           },
           columnPinning: { right: ['actions'] },
         }}

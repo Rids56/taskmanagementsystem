@@ -2,17 +2,57 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { TestList } from '../../pages/interfaceType';
 
 interface TestListState {
-  data: TestList[];
-  selected: TestList | null;
-  loading: boolean;
-  error: any | null;
+  get: {
+    data: TestList[];
+    selected: TestList | null;
+    loading: boolean;
+    error: any | null;
+  };
+  getOne: {
+    data: TestList[];
+    selected: TestList | null;
+    loading: boolean;
+    error: any | null;
+  };
+  add: {
+    data: TestList[];
+    selected: TestList | null;
+    loading: boolean;
+    error: any | null;
+  };
+  edit: {
+    data: TestList[];
+    selected: TestList | null;
+    loading: boolean;
+    error: any | null;
+  };
 }
 
 const initialState: TestListState = {
-  data: [],
-  selected: null,
-  loading: false,
-  error: null,
+  get: {
+    data: [],
+    selected: null,
+    loading: false,
+    error: null,
+  },
+  getOne: {
+    data: [],
+    selected: null,
+    loading: false,
+    error: null,
+  },
+  add: {
+    data: [],
+    selected: null,
+    loading: false,
+    error: null,
+  },
+  edit: {
+    data: [],
+    selected: null,
+    loading: false,
+    error: null,
+  },
 };
 
 const testListSlice = createSlice({
@@ -20,57 +60,57 @@ const testListSlice = createSlice({
   initialState,
   reducers: {
     getTestListRequest: (state) => {
-      state.loading = true;
-      state.error = null;
+      state.get.loading = true;
+      state.get.error = null;
     },
     getTestListSuccess: (state, action: PayloadAction<TestList[]>) => {
-      state.loading = false;
-      state.data = action.payload;
+      state.get.loading = false;
+      state.get.data = action.payload;
     },
     getTestListFailure: (state, action: PayloadAction<string>) => {
-      state.loading = false;
-      state.error = action.payload;
+      state.get.loading = false;
+      state.get.error = action.payload;
     },
     getTestByIdRequest: (state, _action: PayloadAction<string>) => {
-      state.loading = true;
-      state.error = null;
+      state.getOne.loading = true;
+      state.getOne.error = null;
     },
     getTestByIdSuccess: (state, action: PayloadAction<TestList>) => {
-      state.loading = false;
-      state.selected = action.payload;
+      state.getOne.loading = false;
+      state.getOne.selected = action.payload;
     },
     getTestByIdFailure: (state, action: PayloadAction<string>) => {
-      state.loading = false;
-      state.error = action.payload;
+      state.getOne.loading = false;
+      state.getOne.error = action.payload;
     },
     createTestRequest: (state, _action: PayloadAction<any>) => {
-      state.loading = true;
-      state.error = null;
+      state.add.loading = true;
+      state.add.error = null;
     },
     createTestSuccess: (state, action: PayloadAction<TestList>) => {
-      state.loading = false;
+      state.add.loading = false;
       // prepend new test to list
-      state.data = [action.payload, ...state.data];
-      state.selected = action.payload;
+      state.add.data = [action.payload, ...state.add.data];
+      state.add.selected = action.payload;
     },
     createTestFailure: (state, action: PayloadAction<any>) => {
-      state.loading = false;
-      state.error = action.payload;
+      state.add.loading = false;
+      state.add.error = action.payload;
     },
     updateTestRequest: (state, _action: PayloadAction<any>) => {
-      state.loading = true;
-      state.error = null;
+      state.edit.loading = true;
+      state.edit.error = null;
     },
     updateTestSuccess: (state, action: PayloadAction<TestList>) => {
-      state.loading = false;
-      state.data = state.data.map((test) =>
+      state.edit.loading = false;
+      state.edit.data = state.edit.data.map((test) =>
         test.id === action.payload.id ? action.payload : test
       );
-      state.selected = action.payload;
+      state.edit.selected = action.payload;
     },
     updateTestFailure: (state, action: PayloadAction<any>) => {
-      state.loading = false;
-      state.error = action.payload;
+      state.edit.loading = false;
+      state.edit.error = action.payload;
     },
     resetTestList: () => initialState,
   },

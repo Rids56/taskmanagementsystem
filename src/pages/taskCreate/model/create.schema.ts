@@ -88,7 +88,7 @@ export const taskCreateSchema = z.object({
     })
     .min(1, 'Total questions must be greater than 0'),
 
-  status: z.enum(['draft', 'live']).optional(),
+  status: z.enum(['draft', 'live']),
 });
 
 export type TaskCreateFormValues = z.infer<typeof taskCreateSchema>;

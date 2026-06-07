@@ -1,0 +1,68 @@
+import { call, put, takeLatest } from 'redux-saga/effects';
+import {
+  createQuestionsBulkApi,
+  updateQuestionsBulkApi,
+  getQuestionsBulkApi,
+} from '../api/questionApi';
+import {
+  createQuestionsFailure,
+  createQuestionsRequest,
+  createQuestionsSuccess,
+  updateQuestionsFailure,
+  updateQuestionsRequest,
+  updateQuestionsSuccess,
+  getQuestionsFailure,
+  getQuestionsRequest,
+  getQuestionsSuccess,
+} from '../slices/questionSlice';
+
+function* createQuestionsWorker(
+  action: ReturnType<typeof createQuestionsRequest>
+): Generator<any, void, any> {
+  try {
+    const response = yield call(createQuestionsBulkApi, action.payload);
+    yield put(createQuestionsSuccess(response.data ?? response));
+  } catch (error: any) {
+    yield put(
+      createQuestionsFailure(
+        error?.response?.data ?? { message: 'Failed to create questions' }
+      )
+    );
+  }
+}
+
+function* updateQuestionsWorker(
+  action: ReturnType<typeof updateQuestionsRequest>
+): Generator<any, void, any> {
+  try {
+    const response = yield call(updateQuestionsBulkApi, action.payload);
+    yield put(updateQuestionsSuccess(response.data ?? response));
+  } catch (error: any) {
+    yield put(
+      updateQuestionsFailure(
+        error?.response?.data ?? { message: 'Failed to update questions' }
+      )
+    );
+  }
+}
+
+function* getQuestionsWorker(
+  action: ReturnType<typeof getQuestionsRequest>
+): Generator<any, void, any> {
+  try {
+    const response = yield call(getQuestionsBulkApi, action.payload);
+    yield put(getQuestionsSuccess(response.data ?? response));
+  } catch (error: any) {
+    yield put(
+      getQuestionsFailure(
+        error?.response?.data ?? { message: 'Failed to get questions' }
+      )
+    );
+  }
+}
+
+export function* questionSaga() {
+  yield takeLatest(createQuestionsRequest.type, createQuestionsWorker);
+  yield takeLatest(updateQuestionsRequest.type, updateQuestionsWorker);
+  yield takeLatest(getQuestionsRequest.type, getQuestionsWorker);
+}

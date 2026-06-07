@@ -4,6 +4,7 @@ import subjectsReducer from './slices/subjectSlice';
 import topicReducer from './slices/topicSlice';
 import subTopicReducer from './slices/subTopicSlice';
 import testListReducer from './slices/testListSlice';
+import questionReducer from './slices/questionSlice';
 import authReducer from '../store/slices/authSlice';
 import rootSaga from './sagas/rootSaga';
 
@@ -16,6 +17,7 @@ export const store = configureStore({
     topics: topicReducer,
     subTopics: subTopicReducer,
     testList: testListReducer,
+    question: questionReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({ thunk: false }).concat(sagaMiddleware),
