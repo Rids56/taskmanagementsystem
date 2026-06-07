@@ -6,22 +6,21 @@ import {
   Typography,
   ToggleButton,
   ToggleButtonGroup,
-  TextField,
 } from '@mui/material';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { PublishFormValues as IFormInput } from './model/publish.schema';
 import {
   Controller,
   useFormContext,
-  useFormState,
+  // useFormState,
   useWatch,
 } from 'react-hook-form';
 import { useEffect } from 'react';
 
 export default function PublishSettings() {
-  const { control, register, trigger } = useFormContext<IFormInput>();
-  const { errors } = useFormState({
-    control,
-  });
+  const { control, trigger } = useFormContext<IFormInput>();
 
   const publishMode = useWatch({
     control,
@@ -33,7 +32,7 @@ export default function PublishSettings() {
   });
 
   useEffect(() => {
-    trigger(['endDate', 'endTime']);
+    trigger(['expiry_date']);
   }, [liveUntil, trigger]);
 
   return (
@@ -67,7 +66,7 @@ export default function PublishSettings() {
             </Typography>
 
             <Grid sx={{ mb: 4 }} container spacing={2}>
-              <Grid size={{ xs: 12, md: 6 }}>
+              {/* <Grid size={{ xs: 12, md: 6 }}>
                 <Controller
                   name="publishDate"
                   control={control}
@@ -109,6 +108,28 @@ export default function PublishSettings() {
                       helperText={errors.publishTime?.message}
                       {...field}
                     />
+                  )}
+                />
+              </Grid> */}
+              <Grid size={12}>
+                <Controller
+                  name="scheduled_date"
+                  control={control}
+                  render={({ field, fieldState }) => (
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                      <DateTimePicker
+                        label="Publish Date & Time"
+                        value={field.value}
+                        onChange={field.onChange}
+                        slotProps={{
+                          textField: {
+                            fullWidth: true,
+                            error: !!fieldState.error,
+                            helperText: fieldState.error?.message,
+                          },
+                        }}
+                      />
+                    </LocalizationProvider>
                   )}
                 />
               </Grid>
@@ -189,7 +210,7 @@ export default function PublishSettings() {
         />
       </Grid>
 
-      <Grid size={{ xs: 12, md: 6 }}>
+      {/* <Grid size={{ xs: 12, md: 6 }}>
         <Controller
           control={control}
           name="endDate"
@@ -231,6 +252,29 @@ export default function PublishSettings() {
               helperText={errors.endTime?.message}
               {...field}
             />
+          )}
+        />
+      </Grid> */}
+      <Grid size={12}>
+        <Controller
+          name="expiry_date"
+          control={control}
+          render={({ field, fieldState }) => (
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DateTimePicker
+                label="Expiry Date & Time"
+                value={field.value}
+                onChange={field.onChange}
+                disabled={liveUntil !== 'custom'}
+                slotProps={{
+                  textField: {
+                    fullWidth: true,
+                    error: !!fieldState.error,
+                    helperText: fieldState.error?.message,
+                  },
+                }}
+              />
+            </LocalizationProvider>
           )}
         />
       </Grid>
