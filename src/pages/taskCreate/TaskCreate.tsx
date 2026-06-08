@@ -200,13 +200,13 @@ export default function TaskCreate() {
   }, [isEditMode, getOneTestSuccess, subjects, topics, subTopics]);
 
   useEffect(() => {
-    if (!isEmpty(getOneTestSuccess)) {
-      setSnackbar({
-        isOpen: true,
-        mode: 'success',
-        msg: `Test fetch Successfully`,
-      });
-    }
+    // if (!isEmpty(getOneTestSuccess)) {
+    //   setSnackbar({
+    //     isOpen: true,
+    //     mode: 'success',
+    //     msg: `Test fetch Successfully`,
+    //   });
+    // }
 
     if (getOneTestError) {
       setSnackbar({

@@ -85,6 +85,81 @@ const appTheme = createTheme({
           minHeight: '100vh',
           fontFamily: ['Inter', 'system-ui', 'sans-serif'].join(','),
         },
+
+        '.app-editor': {
+          border: '1px solid #fff',
+          borderRadius: '4px',
+          transition: 'border-color 200ms, box-shadow 200ms',
+
+          '&:hover': {
+            borderColor: '#5f77ff',
+          },
+
+          '&:focus-within': {
+            borderColor: '#2563eb',
+            borderWidth: '1px',
+            boxShadow: '0 0 0 1px #2563eb',
+          },
+
+          '& .ql-toolbar': {
+            border: 'none',
+            borderBottom: '1px solid',
+            borderColor: 'inherit',
+            backgroundColor: '#fff',
+          },
+
+          '& .ql-toolbar.ql-snow, .ql-container.ql-snow': {
+            borderRadius: '4px',
+          },
+
+          '& .ql-container': {
+            border: 'none',
+            fontFamily: 'inherit',
+          },
+
+          '& .ql-editor': {
+            padding: '16.5px 14px',
+            fontSize: '1rem',
+            fontFamily: 'inherit',
+          },
+        },
+
+        '.app-editor-error': {
+          border: '1px solid #fff',
+          borderColor: '#d32f2f',
+
+          '&:hover': {
+            borderColor: '#d32f2f',
+          },
+
+          '&:focus-within': {
+            borderColor: '#d32f2f',
+            boxShadow: '0 0 0 1px #d32f2f',
+          },
+        },
+      },
+    },
+    MuiOutlinedInput: {
+      styleOverrides: {
+        root: {
+          '&:hover:not(.Mui-error) .MuiOutlinedInput-notchedOutline': {
+            borderColor: '#5f77ff',
+          },
+
+          '&.Mui-focused:not(.Mui-error) .MuiOutlinedInput-notchedOutline': {
+            borderColor: '#7389ff',
+            borderWidth: 1,
+          },
+
+          '&.Mui-focused:not(.Mui-error)': {
+            boxShadow: '0 0 0 2px rgba(115, 137, 255, 0.2)',
+            borderRadius: 4,
+          },
+
+          // '&.Mui-error.Mui-focused': {
+          //   boxShadow: '0 0 0 1px rgba(211, 47, 47, 0.15)',
+          // },
+        },
       },
     },
     MuiButton: {

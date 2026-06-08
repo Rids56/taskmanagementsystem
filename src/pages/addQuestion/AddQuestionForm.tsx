@@ -2,6 +2,7 @@ import {
   Autocomplete,
   Box,
   Button,
+  FormHelperText,
   Grid,
   MenuItem,
   TextField,
@@ -17,6 +18,7 @@ import {
 import { Controller, useFormContext, useFormState } from 'react-hook-form';
 import type { AddQuestionFormValues as IFormInput } from './model/addQuestion.schema';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { Editor } from 'primereact/editor';
 
 interface AddQuestionFormProps {
   onAddAnother: (values: IFormInput) => void;
@@ -56,6 +58,7 @@ const AddQuestionForm = ({
   const isExistingQuestion = !!questionId && questionId !== 'temp_id';
   const canDelete =
     isExistingQuestion || (rowData?.questions?.length ?? 0) >= questionNumber;
+  const minRows = 8;
 
   return (
     <>
@@ -115,19 +118,31 @@ const AddQuestionForm = ({
           <Controller
             name="question"
             control={control}
-            render={({ field }) => (
-              <TextField
-                fullWidth
-                multiline
-                rows={4}
-                label="Question"
-                placeholder="Type the question here"
-                {...register('question')}
-                error={!!errors.question}
-                helperText={errors.question?.message}
-                {...field}
-              />
-            )}
+            render={({ field, fieldState }) => {
+              return (
+                <>
+                  <Box
+                    className={`app-editor ${fieldState.error ? 'app-editor-error' : ''}`}
+                  >
+                    <Editor
+                      value={field.value ?? ''}
+                      onTextChange={(e) => {
+                        field.onChange(e.htmlValue ?? '');
+                      }}
+                      style={{
+                        minHeight: `${minRows * 24}px`,
+                      }}
+                    />
+                  </Box>
+
+                  {fieldState.error && (
+                    <FormHelperText error>
+                      {fieldState.error.message}
+                    </FormHelperText>
+                  )}
+                </>
+              );
+            }}
           />
         </Grid>
 

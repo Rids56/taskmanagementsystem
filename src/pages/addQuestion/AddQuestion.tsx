@@ -85,7 +85,7 @@ export default function AddQuestion() {
 
   const formContext = useForm<IFormInput>({
     resolver: zodResolver(FormSchema),
-    mode: 'onChange',
+    mode: 'onSubmit',
     reValidateMode: 'onChange',
     defaultValues: { ...initialValues },
   });

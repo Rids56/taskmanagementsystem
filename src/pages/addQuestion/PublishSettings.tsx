@@ -126,6 +126,23 @@ export default function PublishSettings() {
                             fullWidth: true,
                             error: !!fieldState.error,
                             helperText: fieldState.error?.message,
+                            sx: {
+                              '& .MuiPickersOutlinedInput-root:hover:not(.Mui-error) .MuiPickersOutlinedInput-notchedOutline':
+                                {
+                                  borderColor: '#5f77ff',
+                                },
+
+                              '& .MuiPickersOutlinedInput-root.Mui-focused:not(.Mui-error) .MuiPickersOutlinedInput-notchedOutline':
+                                {
+                                  borderColor: '#7389ff',
+                                },
+
+                              '& .MuiPickersOutlinedInput-root.Mui-focused:not(.Mui-error)':
+                                {
+                                  boxShadow: '0 0 0 2px rgba(115,137,255,0.2)',
+                                  borderRadius: 1,
+                                },
+                            },
                           },
                         }}
                       />
@@ -271,6 +288,23 @@ export default function PublishSettings() {
                     fullWidth: true,
                     error: !!fieldState.error,
                     helperText: fieldState.error?.message,
+                    sx: {
+                      '& .MuiPickersOutlinedInput-root:hover:not(.Mui-error) .MuiPickersOutlinedInput-notchedOutline':
+                        {
+                          borderColor: '#5f77ff',
+                        },
+
+                      '& .MuiPickersOutlinedInput-root.Mui-focused:not(.Mui-error) .MuiPickersOutlinedInput-notchedOutline':
+                        {
+                          borderColor: '#7389ff',
+                        },
+
+                      '& .MuiPickersOutlinedInput-root.Mui-focused:not(.Mui-error)':
+                        {
+                          boxShadow: '0 0 0 2px rgba(115,137,255,0.2)',
+                          borderRadius: 1,
+                        },
+                    },
                   },
                 }}
               />
