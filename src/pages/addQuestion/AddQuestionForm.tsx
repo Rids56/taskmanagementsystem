@@ -44,6 +44,7 @@ const AddQuestionForm = ({
 
   const rowData = location.state?.rowData;
   const returnTo = location.state?.returnTo;
+  const isViewMode = location.state?.mode === 'view';
 
   const { control, register, handleSubmit, getValues } =
     useFormContext<IFormInput>();
@@ -57,7 +58,8 @@ const AddQuestionForm = ({
   const questionId = getValues('id');
   const isExistingQuestion = !!questionId && questionId !== 'temp_id';
   const canDelete =
-    isExistingQuestion || (rowData?.questions?.length ?? 0) >= questionNumber;
+    !isViewMode &&
+    (isExistingQuestion || (rowData?.questions?.length ?? 0) >= questionNumber);
   const minRows = 8;
 
   return (
@@ -298,7 +300,6 @@ const AddQuestionForm = ({
           <Button
             variant="outlined"
             color="warning"
-            // onClick={onClear}
             onClick={() => {
               if (returnTo) {
                 navigate(returnTo, {
@@ -317,7 +318,7 @@ const AddQuestionForm = ({
 
         <Grid size={{ xs: 12, md: 6 }}>
           <Box sx={{ display: 'flex', justifyContent: 'end', gap: 1 }}>
-            <Button type="submit" variant="contained">
+            <Button type="submit" variant="contained" disabled={isViewMode}>
               Save & Continue
             </Button>
 

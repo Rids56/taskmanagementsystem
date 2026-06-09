@@ -12,7 +12,7 @@ import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined';
 import QuizOutlinedIcon from '@mui/icons-material/QuizOutlined';
 import AssessmentOutlinedIcon from '@mui/icons-material/AssessmentOutlined';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { TopicOption } from '../interfaceType';
 import IconChapter from '../../assets/ar_stickers.png';
 import IconLevel from '../../assets/cognition.png';
@@ -23,6 +23,8 @@ interface TestInfoCardProps {
 
 export default function TestInfoCard({ rowData }: TestInfoCardProps) {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isViewMode = location.state?.mode === 'view';
 
   return (
     <Paper
@@ -38,6 +40,7 @@ export default function TestInfoCard({ rowData }: TestInfoCardProps) {
     >
       {/* Edit */}
       <IconButton
+        disabled={isViewMode}
         size="small"
         sx={{
           position: 'absolute',

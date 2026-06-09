@@ -23,6 +23,7 @@ import {
   getTestListRequest,
   resetTestList,
 } from '../../store/slices/testListSlice';
+import { isEmpty } from 'lodash';
 
 export default function TestListTable() {
   const navigate = useNavigate();
@@ -43,6 +44,7 @@ export default function TestListTable() {
       loading: testDeleteLoader,
       error: testDeleteError,
     },
+    edit: { data: editPublishTestSuccess },
   } = useSelector((state: RootState) => state?.testList ?? []);
 
   const data = useMemo<TestList[]>(() => testListData ?? [], [testListData]);
@@ -181,6 +183,16 @@ export default function TestListTable() {
       dispatch(resetTestList());
     };
   }, []);
+
+  useEffect(() => {
+    if (!isEmpty(editPublishTestSuccess)) {
+      setSnackbar({
+        isOpen: true,
+        mode: 'success',
+        msg: `Test updated successfully`,
+      });
+    }
+  }, [editPublishTestSuccess]);
 
   useEffect(() => {
     if (testDeleteSuccess) {

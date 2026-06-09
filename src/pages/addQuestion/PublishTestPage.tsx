@@ -3,7 +3,7 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useSelector } from 'react-redux';
 import { isEmpty } from 'lodash';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { updateTestRequest } from '../../store/slices/testListSlice';
 import { useAppDispatch } from '../../hooks';
 import { RootState } from '../../store/store';
@@ -21,12 +21,11 @@ interface PublishTestPageProps {
   onCancel: () => void;
 }
 
-export default function PublishTestPage({
-  rowData,
-  onCancel,
-}: PublishTestPageProps) {
+const PublishTestPage = ({ rowData, onCancel }: PublishTestPageProps) => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
+  const isViewMode = location?.state?.mode === 'view';
 
   const [snackbar, setSnackbar] = useState<{
     isOpen: boolean;
@@ -109,31 +108,6 @@ export default function PublishTestPage({
     }
   }, [editTestSuccess, editTestError]);
 
-  // const buildPayload = (data: IFormInput) => {
-  //   let scheduled_date: string | null = null;
-  //   let expiry_date: string | null = null;
-
-  //   if (
-  //     data.publishMode === 'schedule' &&
-  //     data.publishDate &&
-  //     data.publishTime
-  //   ) {
-  //     scheduled_date = new Date(
-  //       `${data.publishDate}T${data.publishTime}`
-  //     ).toISOString();
-  //   }
-
-  //   if (data.liveUntil === 'custom' && data.endDate && data.endTime) {
-  //     expiry_date = new Date(`${data.endDate}T${data.endTime}`).toISOString();
-  //   }
-
-  //   return {
-  //     status: data.publishMode === 'now' ? 'live' : 'scheduled',
-  //     scheduled_date,
-  //     expiry_date,
-  //   };
-  // };
-
   const onSubmit = (data: IFormInput) => {
     const dirtyData = getDirtyValues(data, dirtyFields);
     if (Object.keys(dirtyData).length === 0) {
@@ -145,7 +119,6 @@ export default function PublishTestPage({
       return;
     }
 
-    // const payload = buildPayload(data);
     const payload = {
       status: data.publishMode === 'now' ? 'live' : 'draft',
 
@@ -190,7 +163,7 @@ export default function PublishTestPage({
                 Cancel
               </Button>
 
-              <Button variant="contained" type="submit">
+              <Button variant="contained" type="submit" disabled={isViewMode}>
                 {watch('publishMode') === 'now'
                   ? 'Publish Now'
                   : 'Schedule Test'}
@@ -228,4 +201,6 @@ export default function PublishTestPage({
       </FormProvider>
     </>
   );
-}
+};
+
+export default PublishTestPage;

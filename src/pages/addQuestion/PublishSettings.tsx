@@ -11,12 +11,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { PublishFormValues as IFormInput } from './model/publish.schema';
-import {
-  Controller,
-  useFormContext,
-  // useFormState,
-  useWatch,
-} from 'react-hook-form';
+import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { useEffect } from 'react';
 
 export default function PublishSettings() {
@@ -66,51 +61,6 @@ export default function PublishSettings() {
             </Typography>
 
             <Grid sx={{ mb: 4 }} container spacing={2}>
-              {/* <Grid size={{ xs: 12, md: 6 }}>
-                <Controller
-                  name="publishDate"
-                  control={control}
-                  render={({ field }) => (
-                    <TextField
-                      fullWidth
-                      type="date"
-                      label="Publish Date"
-                      {...register('publishDate')}
-                      slotProps={{
-                        inputLabel: {
-                          shrink: true,
-                        },
-                      }}
-                      error={!!errors.publishDate}
-                      helperText={errors.publishDate?.message}
-                      {...field}
-                    />
-                  )}
-                />
-              </Grid>
-
-              <Grid size={{ xs: 12, md: 6 }}>
-                <Controller
-                  control={control}
-                  name="publishTime"
-                  render={({ field }) => (
-                    <TextField
-                      fullWidth
-                      type="time"
-                      label="Publish Time"
-                      {...register('publishTime')}
-                      slotProps={{
-                        inputLabel: {
-                          shrink: true,
-                        },
-                      }}
-                      error={!!errors.publishTime}
-                      helperText={errors.publishTime?.message}
-                      {...field}
-                    />
-                  )}
-                />
-              </Grid> */}
               <Grid size={12}>
                 <Controller
                   name="scheduled_date"
@@ -121,6 +71,7 @@ export default function PublishSettings() {
                         label="Publish Date & Time"
                         value={field.value}
                         onChange={field.onChange}
+                        format="DD/MM/YYYY hh:mm A"
                         slotProps={{
                           textField: {
                             fullWidth: true,
@@ -282,6 +233,7 @@ export default function PublishSettings() {
                 label="Expiry Date & Time"
                 value={field.value}
                 onChange={field.onChange}
+                format="DD/MM/YYYY hh:mm A"
                 disabled={liveUntil !== 'custom'}
                 slotProps={{
                   textField: {

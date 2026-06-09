@@ -329,7 +329,6 @@ export default function TaskCreate() {
   const onSubmit = async (data: IFormInput) => {
     if (Object.keys(errors).length === 0) {
       rowDataRef.current = data;
-      // setPendingSave(true);
       const dirtyData = getDirtyValues(data, dirtyFields);
 
       if (Object.keys(dirtyData).length === 0) {
@@ -338,7 +337,6 @@ export default function TaskCreate() {
           mode: 'error',
           msg: 'No fields to update',
         });
-        // setPendingSave(false);
         return;
       }
 
@@ -734,9 +732,6 @@ export default function TaskCreate() {
                               if (returnTo) {
                                 navigate(returnTo);
                               }
-                              // else {
-                              //   navigate(-1);
-                              // }
                             } else {
                               reset();
                             }
@@ -766,7 +761,7 @@ export default function TaskCreate() {
                             </Button>
                           )}
                         <Button variant="contained" type="submit">
-                          {isEditMode ? 'Update Test' : 'Next'}
+                          {isEditMode ? 'Update Test' : 'Save & Continue'}
                         </Button>
                       </>
                     )}
