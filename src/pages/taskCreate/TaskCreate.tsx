@@ -228,7 +228,7 @@ export default function TaskCreate() {
       navigate('/task-create/add-question', {
         state: {
           ...(location.state.mode && { mode: location.state.mode }),
-          rowData: { ...rowDataRef.current, id: addTestSuccess?.[0]?.id },
+          rowData: { ...rowDataRef.current, ...addTestSuccess?.[0] },
           id: addTestSuccess?.[0]?.id,
         },
       });
@@ -254,7 +254,7 @@ export default function TaskCreate() {
       navigate('/task-create/add-question', {
         state: {
           ...(location.state.mode && { mode: location.state.mode }),
-          rowData: rowDataRef.current,
+          rowData: { ...rowDataRef.current, ...editTestSuccess?.[0] },
           id: rowDataRef.current?.id,
         },
       });

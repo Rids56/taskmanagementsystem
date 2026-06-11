@@ -123,6 +123,7 @@ export default function AddQuestion() {
   useEffect(() => {
     const validId = questions[currentQuestionNumber - 1];
     if (validId === 'temp_id' || validId == null) return;
+
     if (questions && questions?.length > 0) {
       dispatch(
         getQuestionsRequest({
@@ -578,7 +579,7 @@ export default function AddQuestion() {
                 onCancel={() => setPageMode('questions')}
               />
             ) : (
-              <Box component="form" onSubmit={handleSubmit(handleSaveContinue)}>
+              <form onSubmit={handleSubmit(handleSaveContinue)}>
                 <AddQuestionForm
                   onNext={handleNext}
                   onAddAnother={handleAddAnotherQuestion}
@@ -588,7 +589,7 @@ export default function AddQuestion() {
                   questionNumber={currentQuestionNumber}
                   totalQuestions={totalQuestions}
                 />
-              </Box>
+              </form>
             )}
           </Paper>
         </Box>

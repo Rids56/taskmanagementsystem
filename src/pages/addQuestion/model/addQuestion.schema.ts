@@ -22,6 +22,7 @@ export const addQuestionSchema = z.object({
     .object({
       id: z.string(),
       name: z.string(),
+      subject_id: z.string(),
     })
     .nullable()
     .optional(),
@@ -30,6 +31,7 @@ export const addQuestionSchema = z.object({
     .object({
       id: z.string(),
       name: z.string(),
+      topic_id: z.string(),
     })
     .nullable()
     .optional(),

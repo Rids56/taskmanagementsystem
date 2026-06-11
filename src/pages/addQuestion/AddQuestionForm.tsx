@@ -12,13 +12,14 @@ import {
   Add as AddIcon,
   CancelOutlined,
   DeleteOutlineOutlined,
-  Download,
+  // Download,
 } from '@mui/icons-material';
 
 import { Controller, useFormContext, useFormState } from 'react-hook-form';
 import type { AddQuestionFormValues as IFormInput } from './model/addQuestion.schema';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Editor } from 'primereact/editor';
+import CsvUploadButton from '../../components/CsvUploadButton';
 
 interface AddQuestionFormProps {
   onAddAnother: (values: IFormInput) => void;
@@ -46,7 +47,7 @@ const AddQuestionForm = ({
   const returnTo = location.state?.returnTo;
   const isViewMode = location.state?.mode === 'view';
 
-  const { control, register, handleSubmit, getValues } =
+  const { control, register, handleSubmit, getValues, setValue } =
     useFormContext<IFormInput>();
   const { errors } = useFormState({
     control,
@@ -62,6 +63,87 @@ const AddQuestionForm = ({
     (isExistingQuestion || (rowData?.questions?.length ?? 0) >= questionNumber);
   const minRows = 8;
 
+  // csv parsing helpers
+  const getSelectOption = (
+    field: 'topic' | 'sub_topic',
+    value?: string | null
+  ) => {
+    if (!value) return null;
+    const search = value.toString().trim().toLowerCase();
+    const options = field === 'topic' ? topicOptions : subTopicOptions;
+    return (
+      options.find(
+        (option: any) =>
+          option?.name?.toString().trim().toLowerCase() === search
+      ) ?? null
+    );
+  };
+  const normalizeCorrectOption = (value?: string) => {
+    if (!value) return '';
+    const normalized = value.toString().trim().toLowerCase();
+    if (
+      ['option1', 'option 1', '1', 'a', 'option a', 'opt1'].includes(normalized)
+    )
+      return 'option1';
+    if (
+      ['option2', 'option 2', '2', 'b', 'option b', 'opt2'].includes(normalized)
+    )
+      return 'option2';
+    if (
+      ['option3', 'option 3', '3', 'c', 'option c', 'opt3'].includes(normalized)
+    )
+      return 'option3';
+    if (
+      ['option4', 'option 4', '4', 'd', 'option d', 'opt4'].includes(normalized)
+    )
+      return 'option4';
+    return normalized.startsWith('option') ? normalized : '';
+  };
+  const updateFormFromCsvRow = (row: Record<string, any>) => {
+    setValue(
+      'question',
+      row.question ?? row.Question ?? row.question_text ?? ''
+    );
+
+    setValue('option1', row.option1 ?? row.Option1 ?? row['Option 1'] ?? '');
+    setValue('option2', row.option2 ?? row.Option2 ?? row['Option 2'] ?? '');
+    setValue('option3', row.option3 ?? row.Option3 ?? row['Option 3'] ?? '');
+    setValue('option4', row.option4 ?? row.Option4 ?? row['Option 4'] ?? '');
+
+    setValue(
+      'correct_option',
+      normalizeCorrectOption(
+        row.correct_option ??
+          row.CorrectOption ??
+          row['Correct Option'] ??
+          row.answer ??
+          ''
+      )
+    );
+
+    setValue('explanation', row.explanation ?? row.Explanation ?? '');
+    setValue('difficulty', row.difficulty ?? row.Difficulty ?? '');
+
+    setValue(
+      'topic',
+      getSelectOption(
+        'topic',
+        row.topic ?? row.Topic ?? row['Topic Name'] ?? row['topic name']
+      )
+    );
+
+    setValue(
+      'sub_topic',
+      getSelectOption(
+        'sub_topic',
+        row.sub_topic ??
+          row.SubTopic ??
+          row['Sub Topic'] ??
+          row['sub_topic_name']
+      )
+    );
+  };
+
   return (
     <>
       <Grid container spacing={3} key={rowData?.id}>
@@ -76,9 +158,16 @@ const AddQuestionForm = ({
             <Button variant="outlined" startIcon={<AddIcon />}>
               MCQ
             </Button>
-            <Button variant="outlined" startIcon={<Download />}>
+            {/* <Button variant="outlined" startIcon={<Download />}>
               CSV
-            </Button>
+            </Button> */}
+            <CsvUploadButton
+              onCsvParsed={(row) => {
+                // form-specific logic
+                updateFormFromCsvRow(row);
+              }}
+              buttonText="CSV"
+            />
           </Box>
         </Grid>
         <Grid
@@ -244,27 +333,32 @@ const AddQuestionForm = ({
           <Controller
             name="topic"
             control={control}
-            render={({ field }) => (
-              <Autocomplete
-                id="topic"
-                options={topicOptions}
-                value={field.value ?? null}
-                onChange={(_, value) => field.onChange(value)}
-                isOptionEqualToValue={(option, value) =>
-                  option.id === value?.id
-                }
-                getOptionLabel={(option) => option?.name ?? ''}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label="Topic"
-                    placeholder="Select Topic"
-                    error={!!errors.topic}
-                    helperText={errors.topic?.message}
-                  />
-                )}
-              />
-            )}
+            render={({ field }) => {
+              return (
+                <Autocomplete
+                  id="topic"
+                  selectOnFocus
+                  options={topicOptions}
+                  value={field.value ?? null}
+                  onChange={(_, value) => {
+                    field.onChange(value);
+                  }}
+                  isOptionEqualToValue={(option, value) =>
+                    option.id === value?.id
+                  }
+                  getOptionLabel={(option) => option?.name ?? ''}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Topic"
+                      placeholder="Select Topic"
+                      error={!!errors.topic}
+                      helperText={errors.topic?.message}
+                    />
+                  )}
+                />
+              );
+            }}
           />
         </Grid>
 
@@ -272,27 +366,31 @@ const AddQuestionForm = ({
           <Controller
             name="sub_topic"
             control={control}
-            render={({ field }) => (
-              <Autocomplete
-                id="sub_topic"
-                options={subTopicOptions}
-                value={field.value ?? null}
-                onChange={(_, value) => field.onChange(value)}
-                isOptionEqualToValue={(option, value) =>
-                  option.id === value?.id
-                }
-                getOptionLabel={(option) => option?.name ?? ''}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label="Sub Topic"
-                    placeholder="Select Sub Topic"
-                    error={!!errors.sub_topic}
-                    helperText={errors.sub_topic?.message}
-                  />
-                )}
-              />
-            )}
+            render={({ field }) => {
+              return (
+                <Autocomplete
+                  id="sub_topic"
+                  options={subTopicOptions}
+                  value={field.value ?? null}
+                  onChange={(_, value) => {
+                    field.onChange(value);
+                  }}
+                  isOptionEqualToValue={(option, value) =>
+                    option.id === value?.id
+                  }
+                  getOptionLabel={(option) => option?.name ?? ''}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Sub Topic"
+                      placeholder="Select Sub Topic"
+                      error={!!errors.sub_topic}
+                      helperText={errors.sub_topic?.message}
+                    />
+                  )}
+                />
+              );
+            }}
           />
         </Grid>
 
@@ -304,7 +402,8 @@ const AddQuestionForm = ({
               if (returnTo) {
                 navigate(returnTo, {
                   state: {
-                    ...(location.state.mode && { mode: location.state.mode }),
+                    ...location.state,
+                    // ...(location.state.mode && { mode: location.state.mode }),
                     id: rowData?.id,
                   },
                 });
