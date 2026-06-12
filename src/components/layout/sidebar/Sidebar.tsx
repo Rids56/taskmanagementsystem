@@ -36,30 +36,51 @@ export default function Sidebar() {
         borderRight: '1px solid #EAEAEA',
         bgcolor: 'background.paper',
         transition: 'width 0.2s ease',
+        position: 'relative',
+        overflow: 'visible',
+        flexShrink: 0,
       }}
     >
       {/* Logo Section */}
       <Box
         sx={{
           height: 72,
-          width: '100%',
+          width: isAddQuestionRoute ? 260 : '100%',
+          position: isAddQuestionRoute ? 'absolute' : 'relative',
+          top: 0,
+          left: 0,
+          // borderRight: '1px solid #EAEAEA',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           px: 2,
           borderBottom: '1px solid #EAEAEA',
+          bgcolor: 'background.paper',
+          zIndex: 10,
         }}
       >
         <Box
           component="img"
           src={logo}
           alt="Company Logo"
-          sx={{ width: isAddQuestionRoute ? 40 : 120, height: 'auto' }}
+          sx={{
+            width: 120,
+            height: 'auto',
+            ...(isAddQuestionRoute && {
+              position: 'absolute',
+              left: '50%',
+              transform: 'translateX(-50%)',
+            }),
+          }}
         />
       </Box>
 
       {/* Menu Section */}
-      <List sx={{ pt: 2 }}>
+      <List
+        sx={{
+          pt: isAddQuestionRoute ? 10 : 2,
+        }}
+      >
         {menus.map((menu) => (
           <ListItemButton
             key={menu.path}
@@ -70,13 +91,19 @@ export default function Sidebar() {
               px: isAddQuestionRoute ? 0 : 1.5,
               borderRadius: 2,
               mb: 0.5,
+              minHeight: 56,
               justifyContent: isAddQuestionRoute ? 'center' : 'flex-start',
               '&.active': {
                 bgcolor: 'action.selected',
               },
             }}
           >
-            <ListItemIcon sx={{ minWidth: 0, justifyContent: 'center' }}>
+            <ListItemIcon
+              sx={{
+                minWidth: isAddQuestionRoute ? 0 : 40,
+                justifyContent: 'center',
+              }}
+            >
               {menu.icon}
             </ListItemIcon>
             {!isAddQuestionRoute && (

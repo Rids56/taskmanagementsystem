@@ -70,8 +70,6 @@ const CsvUploadButton = ({
     event.target.value = '';
   };
 
-  console.log('CSV component');
-
   return (
     <>
       <Button

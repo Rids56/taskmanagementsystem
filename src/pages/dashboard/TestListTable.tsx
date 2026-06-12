@@ -9,6 +9,8 @@ import {
   Tooltip,
 } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
+import { isEmpty } from 'lodash';
+import dayjs from 'dayjs';
 
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
@@ -23,7 +25,7 @@ import {
   getTestListRequest,
   resetTestList,
 } from '../../store/slices/testListSlice';
-import { isEmpty } from 'lodash';
+import { tabMapping } from '../taskCreate/TestTypeTabs';
 
 export default function TestListTable() {
   const navigate = useNavigate();
@@ -58,6 +60,16 @@ export default function TestListTable() {
       {
         accessorKey: 'type',
         header: 'Test Type',
+        Cell: ({ cell }) => {
+          const value = cell.getValue<string>();
+
+          const typeLabel =
+            tabMapping.find((item) => item.value === value)?.label ??
+            value ??
+            '-';
+
+          return typeLabel;
+        },
       },
       {
         accessorKey: 'subject',
@@ -66,10 +78,20 @@ export default function TestListTable() {
       {
         accessorKey: 'topics',
         header: 'Topics',
+        Cell: ({ cell }) => {
+          const value = cell.getValue<string[]>();
+
+          return Array.isArray(value) ? value.join(', ') : '-';
+        },
       },
       {
         accessorKey: 'sub_topics',
         header: 'Sub Topics',
+        Cell: ({ cell }) => {
+          const value = cell.getValue<string[]>();
+
+          return Array.isArray(value) ? value.join(', ') : '-';
+        },
       },
       {
         accessorKey: 'correct_marks',
@@ -99,21 +121,32 @@ export default function TestListTable() {
       {
         accessorKey: 'status',
         header: 'Status',
-        Cell: ({ cell }: any) => (
-          <Chip
-            size="small"
-            label={cell.getValue()}
-            color={cell.getValue() === 'live' ? 'success' : 'warning'}
-          />
-        ),
+        Cell: ({ cell }: any) => {
+          const status = cell.getValue();
+
+          if (!status) return null;
+
+          return (
+            <Chip
+              size="small"
+              label={status.toUpperCase()}
+              color={status === 'live' ? 'success' : 'warning'}
+            />
+          );
+        },
       },
       {
         accessorKey: 'unattempt_marks',
         header: 'Unattempt Marks',
       },
       {
-        accessorKey: 'created_date',
+        accessorKey: 'created_at',
         header: 'Created Date',
+        Cell: ({ cell }) => {
+          const value = cell.getValue<string>();
+
+          return value ? dayjs(value).format('DD/MM/YYYY hh:mm A') : '-';
+        },
       },
       {
         id: 'actions',
@@ -267,6 +300,32 @@ export default function TestListTable() {
             flexDirection: 'column',
           },
         }}
+        muiTableHeadCellProps={({ column }) => ({
+          sx: {
+            backgroundColor: '#F5F7FA',
+            borderBottom: '1px solid #EAEAEA',
+            borderTop: '1px solid #EAEAEA',
+
+            ...(column.getIsPinned() && {
+              boxShadow:
+                column.getIsPinned() === 'right'
+                  ? '-8px 0 12px -6px rgba(0,0,0,.15)'
+                  : '8px 0 12px -6px rgba(0,0,0,.15)',
+            }),
+          },
+        })}
+        muiTableBodyCellProps={({ column }) => ({
+          sx: {
+            borderBottom: '1px solid #EAEAEA',
+
+            ...(column.getIsPinned() && {
+              boxShadow:
+                column.getIsPinned() === 'right'
+                  ? '-8px 0 12px -6px rgba(0,0,0,.15)'
+                  : '8px 0 12px -6px rgba(0,0,0,.15)',
+            }),
+          },
+        })}
         enableRowVirtualization
         rowVirtualizerOptions={{
           overscan: 4,

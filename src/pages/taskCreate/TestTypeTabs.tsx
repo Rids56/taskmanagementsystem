@@ -2,24 +2,25 @@ import { Tabs, Tab, Box } from '@mui/material';
 import { useFormContext } from 'react-hook-form';
 import { TaskCreateFormValues as IFormInput } from './model/create.schema';
 
+export const tabMapping = [
+  {
+    label: 'Chapter Wise',
+    value: 'chapterwise',
+  },
+  {
+    label: 'PYQ',
+    value: 'pyq',
+  },
+  {
+    label: 'Mock',
+    value: 'mock',
+  },
+];
+
 export default function TestTypeTabs() {
   const { watch, setValue } = useFormContext<IFormInput>();
 
   // const tabMapping = ['chapterwise', 'pyq', 'mock'];
-  const tabMapping = [
-    {
-      label: 'Chapter Wise',
-      value: 'chapterwise',
-    },
-    {
-      label: 'PYQ',
-      value: 'pyq',
-    },
-    {
-      label: 'Mock',
-      value: 'mock',
-    },
-  ];
 
   const testType = watch('type');
 
