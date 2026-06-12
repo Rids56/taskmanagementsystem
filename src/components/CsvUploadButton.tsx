@@ -4,39 +4,13 @@ import { Download as DownloadIcon } from '@mui/icons-material';
 import { usePapaParse } from 'react-papaparse';
 
 export interface CsvUploadButtonProps {
-  /**
-   * Callback for first row only
-   */
   onCsvParsed: (row: Record<string, any>) => void;
-
-  /**
-   * Callback for all rows
-   */
   onRowsParsed?: (rows: Record<string, any>[]) => void;
-
-  /**
-   * Parse all rows instead of first row
-   */
   acceptMultipleRows?: boolean;
-
-  /**
-   * Button text
-   */
   buttonText?: string;
-
-  /**
-   * Button variant
-   */
   variant?: 'text' | 'outlined' | 'contained';
-
-  /**
-   * Disable button
-   */
   disabled?: boolean;
 
-  /**
-   * Custom button icon
-   */
   startIcon?: React.ReactNode;
 }
 
@@ -103,7 +77,7 @@ const CsvUploadButton = ({
       <Button
         variant={variant}
         startIcon={startIcon}
-        onClick={() => handleFileSelect}
+        onClick={handleFileSelect}
         disabled={disabled}
       >
         {buttonText}

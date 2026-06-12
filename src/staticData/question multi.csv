@@ -1,0 +1,4 @@
+question,option1,option2,option3,option4,correct_option,explanation,difficulty,topic,sub_topic
+What is React?,Library,Framework,Database,Language,option1,React is a JavaScript library for building UIs,easy,Frontend,React
+Which hook is used for state management?,useEffect,useMemo,useState,useCallback,option3,useState is used to manage component state,easy,Frontend,React Hooks
+What is TypeScript?,Database,Programming Language,Library,Framework,option2,TypeScript is a typed superset of JavaScript,medium,Frontend,TypeScript

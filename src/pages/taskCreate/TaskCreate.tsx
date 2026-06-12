@@ -228,7 +228,7 @@ export default function TaskCreate() {
       navigate('/task-create/add-question', {
         state: {
           ...(location.state.mode && { mode: location.state.mode }),
-          rowData: { ...rowDataRef.current, ...addTestSuccess?.[0] },
+          rowData: { ...rowDataRef.current, id: addTestSuccess?.[0]?.id },
           id: addTestSuccess?.[0]?.id,
         },
       });
@@ -254,7 +254,7 @@ export default function TaskCreate() {
       navigate('/task-create/add-question', {
         state: {
           ...(location.state.mode && { mode: location.state.mode }),
-          rowData: { ...rowDataRef.current, ...editTestSuccess?.[0] },
+          rowData: { ...rowDataRef.current },
           id: rowDataRef.current?.id,
         },
       });
@@ -600,94 +600,139 @@ export default function TaskCreate() {
                 </Grid>
 
                 <Grid size={12}>
-                  <Typography variant="h6" sx={{ mb: 3 }}>
-                    Marking Scheme
+                  <Typography variant="subtitle1" sx={{ mb: 3 }}>
+                    Marking Scheme:
                   </Typography>
 
                   <Grid container spacing={3}>
                     <Grid size={{ xs: 12, md: 2 }}>
-                      <Controller
-                        name="wrong_marks"
-                        control={control}
-                        render={({ field }) => (
-                          <TextField
-                            fullWidth
-                            placeholder="Wrong Answer"
-                            type="number"
-                            error={!!errors?.wrong_marks}
-                            helperText={errors?.wrong_marks?.message}
-                            {...field}
-                          />
-                        )}
-                      />
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: 2,
+                        }}
+                      >
+                        <FormLabel>Wrong Answer</FormLabel>
+                        <Controller
+                          name="wrong_marks"
+                          control={control}
+                          render={({ field }) => (
+                            <TextField
+                              fullWidth
+                              placeholder="Wrong Answer"
+                              type="number"
+                              error={!!errors?.wrong_marks}
+                              helperText={errors?.wrong_marks?.message}
+                              {...field}
+                            />
+                          )}
+                        />
+                      </Box>
                     </Grid>
 
                     <Grid size={{ xs: 12, md: 2 }}>
-                      <Controller
-                        name="unattempt_marks"
-                        control={control}
-                        render={({ field }) => (
-                          <TextField
-                            fullWidth
-                            placeholder="Unattempted"
-                            type="number"
-                            error={!!errors?.unattempt_marks}
-                            helperText={errors?.unattempt_marks?.message}
-                            {...field}
-                          />
-                        )}
-                      />
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: 2,
+                        }}
+                      >
+                        <FormLabel>Unattempted</FormLabel>
+                        <Controller
+                          name="unattempt_marks"
+                          control={control}
+                          render={({ field }) => (
+                            <TextField
+                              fullWidth
+                              placeholder="Unattempted"
+                              type="number"
+                              error={!!errors?.unattempt_marks}
+                              helperText={errors?.unattempt_marks?.message}
+                              {...field}
+                            />
+                          )}
+                        />
+                      </Box>
                     </Grid>
 
                     <Grid size={{ xs: 12, md: 2 }}>
-                      <Controller
-                        name="correct_marks"
-                        control={control}
-                        render={({ field }) => (
-                          <TextField
-                            fullWidth
-                            placeholder="Correct Answer"
-                            type="number"
-                            error={!!errors?.correct_marks}
-                            helperText={errors?.correct_marks?.message}
-                            {...field}
-                          />
-                        )}
-                      />
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: 2,
+                        }}
+                      >
+                        <FormLabel>Correct Answer</FormLabel>
+                        <Controller
+                          name="correct_marks"
+                          control={control}
+                          render={({ field }) => (
+                            <TextField
+                              fullWidth
+                              placeholder="Correct Answer"
+                              type="number"
+                              error={!!errors?.correct_marks}
+                              helperText={errors?.correct_marks?.message}
+                              {...field}
+                            />
+                          )}
+                        />
+                      </Box>
                     </Grid>
 
                     <Grid size={{ xs: 12, md: 3 }}>
-                      <Controller
-                        name="total_questions"
-                        control={control}
-                        render={({ field }) => (
-                          <TextField
-                            fullWidth
-                            placeholder="No Of Questions"
-                            type="number"
-                            error={!!errors?.total_questions}
-                            helperText={errors?.total_questions?.message}
-                            {...field}
-                          />
-                        )}
-                      />
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: 2,
+                        }}
+                      >
+                        <FormLabel>No of Questions</FormLabel>
+                        <Controller
+                          name="total_questions"
+                          control={control}
+                          render={({ field }) => (
+                            <TextField
+                              fullWidth
+                              placeholder="No Of Questions"
+                              type="number"
+                              error={!!errors?.total_questions}
+                              helperText={errors?.total_questions?.message}
+                              {...field}
+                            />
+                          )}
+                        />
+                      </Box>
                     </Grid>
 
                     <Grid size={{ xs: 12, md: 3 }}>
-                      <Controller
-                        name="total_marks"
-                        control={control}
-                        render={({ field }) => (
-                          <TextField
-                            fullWidth
-                            placeholder="Total Marks"
-                            type="number"
-                            error={!!errors?.total_marks}
-                            helperText={errors?.total_marks?.message}
-                            {...field}
-                          />
-                        )}
-                      />
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: 2,
+                        }}
+                      >
+                        <FormLabel>Total Marks</FormLabel>
+                        <Controller
+                          name="total_marks"
+                          control={control}
+                          render={({ field }) => (
+                            <TextField
+                              fullWidth
+                              placeholder="Total Marks"
+                              type="number"
+                              error={!!errors?.total_marks}
+                              helperText={errors?.total_marks?.message}
+                              {...field}
+                            />
+                          )}
+                        />
+                      </Box>
                     </Grid>
                   </Grid>
                 </Grid>

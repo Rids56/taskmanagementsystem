@@ -244,11 +244,14 @@ export default function TestListTable() {
         enableGlobalFilter
         positionGlobalFilter="left"
         enableStickyHeader
-        initialState={{
-          pagination: {
-            pageIndex: 0,
-            pageSize: 100,
+        enablePagination={false}
+        enableBottomToolbar={false}
+        muiTableContainerProps={{
+          sx: {
+            maxHeight: 'calc(100vh - 250px)',
           },
+        }}
+        initialState={{
           columnPinning: { right: ['actions'] },
         }}
         state={{
@@ -264,6 +267,14 @@ export default function TestListTable() {
             flexDirection: 'column',
           },
         }}
+        enableRowVirtualization
+        rowVirtualizerOptions={{
+          overscan: 4,
+        }}
+        // enableColumnVirtualization
+        // columnVirtualizerOptions={{
+        //   overscan: 4,
+        // }}
       />
       <Snackbar
         open={snackbar?.isOpen}

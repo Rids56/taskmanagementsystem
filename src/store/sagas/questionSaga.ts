@@ -69,8 +69,14 @@ function* deleteQuestionsWorker(
   action: ReturnType<typeof deleteQuestionsRequest>
 ): Generator<any, void, any> {
   try {
-    const response = yield call(deleteQuestionsBulkApi, action.payload);
-    yield put(deleteQuestionsSuccess(response.data ?? response));
+    // const response = yield call(deleteQuestionsBulkApi, action.payload);
+    const { id, payload } = action.payload;
+    const response = yield call(deleteQuestionsBulkApi, id, payload);
+    yield put(
+      deleteQuestionsSuccess(
+        response.data ? { ...response.data, id } : { ...response, id }
+      )
+    );
   } catch (error: any) {
     yield put(
       deleteQuestionsFailure(

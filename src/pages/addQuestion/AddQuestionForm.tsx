@@ -162,10 +162,14 @@ const AddQuestionForm = ({
               CSV
             </Button> */}
             <CsvUploadButton
+              disabled={canDelete}
               onCsvParsed={(row) => {
                 // form-specific logic
                 updateFormFromCsvRow(row);
               }}
+              // onRowsParsed={(rows) => {
+              //   console.log('multiple row', rows);
+              // }}
               buttonText="CSV"
             />
           </Box>
@@ -218,7 +222,12 @@ const AddQuestionForm = ({
                     <Editor
                       value={field.value ?? ''}
                       onTextChange={(e) => {
-                        field.onChange(e.htmlValue ?? '');
+                        const html = e.htmlValue ?? '';
+                        const text = e.textValue?.trim() ?? '';
+
+                        const normalizedHtml = `<p>${text}</p>`;
+
+                        field.onChange(html === normalizedHtml ? text : html);
                       }}
                       style={{
                         minHeight: `${minRows * 24}px`,
@@ -227,7 +236,7 @@ const AddQuestionForm = ({
                   </Box>
 
                   {fieldState.error && (
-                    <FormHelperText error>
+                    <FormHelperText error sx={{ ml: 2 }}>
                       {fieldState.error.message}
                     </FormHelperText>
                   )}
@@ -402,8 +411,7 @@ const AddQuestionForm = ({
               if (returnTo) {
                 navigate(returnTo, {
                   state: {
-                    ...location.state,
-                    // ...(location.state.mode && { mode: location.state.mode }),
+                    ...(location.state.mode && { mode: location.state.mode }),
                     id: rowData?.id,
                   },
                 });

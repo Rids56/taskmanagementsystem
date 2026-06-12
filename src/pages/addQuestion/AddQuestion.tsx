@@ -36,6 +36,7 @@ import { isEmpty } from 'lodash';
 import { getDirtyValues } from '../../utils/getDirtyValues';
 import PublishTestPage from './PublishTestPage';
 import { CheckCircle } from '@mui/icons-material';
+import { updateTestRequest } from '../../store/slices/testListSlice';
 
 export default function AddQuestion() {
   const dispatch = useAppDispatch();
@@ -68,6 +69,7 @@ export default function AddQuestion() {
   });
 
   const initialValues = {
+    id: 'temp_id',
     test_id: rowData?.id,
     type: 'mcq',
     subject: rowData?.subject?.name ?? '',
@@ -171,17 +173,22 @@ export default function AddQuestion() {
         msg: `Successfully Created ${addQuestionsSuccess?.length > 1 ? 'Questions' : 'Question'}`,
       });
 
+      const createdQuestionId = addQuestionsSuccess?.[0]?.id;
+
       setQuestions((prev) => {
-        let updated;
+        const updated = [...prev];
+
         if (activeQuestionIndex !== null && activeQuestionIndex < prev.length) {
-          updated = [...prev];
-          updated[activeQuestionIndex] = addQuestionsSuccess?.[0]?.id;
+          updated[activeQuestionIndex] = createdQuestionId;
         } else {
-          updated = [...prev, addQuestionsSuccess?.[0]?.id];
+          updated.push(createdQuestionId);
         }
+
+        // dynamic add another question
         updated.push('temp_id');
         setActiveQuestionIndex(updated.length - 1);
         reset({ ...initialValues });
+
         return updated;
       });
     }
@@ -215,10 +222,48 @@ export default function AddQuestion() {
 
   useEffect(() => {
     if (!isEmpty(deleteQuestionsSuccess)) {
+      const deletedQuestionId =
+        deleteQuestionsSuccess?.[0]?.id || (deleteQuestionsSuccess as any)?.id;
+
       setSnackbar({
         isOpen: true,
         mode: 'success',
-        msg: `Successfully deleted ${deleteQuestionsSuccess?.length > 1 ? 'Questions' : 'Question'}`,
+        msg: `Successfully deleted ${
+          deleteQuestionsSuccess?.length > 1 ? 'Questions' : 'Question'
+        }`,
+      });
+
+      setQuestions((prev) => {
+        const updatedQuestions = prev.filter((id) => id !== deletedQuestionId);
+
+        const apiQuestionIds = updatedQuestions.filter(
+          (id) => id !== 'temp_id'
+        );
+
+        dispatch(
+          updateTestRequest({
+            id: rowData?.id || rowData?.test_id,
+            payload: {
+              questions: apiQuestionIds,
+            },
+          })
+        );
+
+        const nextIndex = Math.min(
+          activeQuestionIndex ?? 0,
+          updatedQuestions.length - 1
+        );
+
+        const nextQuestionId = updatedQuestions[nextIndex];
+
+        if (!nextQuestionId || nextQuestionId === 'temp_id') {
+          setActiveQuestionIndex(Math.max(nextIndex, 0));
+          reset(initialValues);
+        } else {
+          handleQuestionSelect(Math.max(nextIndex, 0));
+        }
+
+        return updatedQuestions;
       });
     }
 
@@ -273,8 +318,10 @@ export default function AddQuestion() {
     }
 
     // POST API
+    const { id, ...restData } = data;
     const createPayload = {
-      ...data,
+      ...restData,
+      ...(id !== 'temp_id' && { id }),
       topic:
         data.topic && typeof data.topic === 'object'
           ? data.topic.id
@@ -326,7 +373,7 @@ export default function AddQuestion() {
     }
   };
 
-  const handleQuestionSelect = (_question: any, index: number) => {
+  const handleQuestionSelect = (/*_question: any, */ index: number) => {
     reset({ ...initialValues });
     // if (question === 'temp_id') reset({ ...initialValues });
     setActiveQuestionIndex(index);
@@ -401,7 +448,8 @@ export default function AddQuestion() {
     if (isExistingQuestion && questions[currentQuestionNumber - 1] === data?.id)
       dispatch(
         deleteQuestionsRequest({
-          question_ids: [data?.id],
+          // question_ids: [data?.id],
+          id: data?.id,
         })
       );
   };
@@ -460,13 +508,13 @@ export default function AddQuestion() {
               sx={{ mt: 3, display: 'flex', flexDirection: 'column', gap: 1 }}
             >
               {questions.length ? (
-                questions.map((question: any, index: number) => {
+                questions.map((_question: any, index: number) => {
                   const isActive = activeQuestionIndex === index;
 
                   return (
                     <Box
                       key={index}
-                      onClick={() => handleQuestionSelect(question, index)}
+                      onClick={() => handleQuestionSelect(/*question, */ index)}
                       sx={{
                         display: 'flex',
                         alignItems: 'center',
