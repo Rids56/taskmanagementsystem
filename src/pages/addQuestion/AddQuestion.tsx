@@ -80,6 +80,7 @@ export default function AddQuestion() {
     option4: '',
     correct_option: '',
     difficulty: '',
+    media_url: '',
     topic: null,
     sub_topic: null,
     explanation: '',
@@ -153,6 +154,7 @@ export default function AddQuestion() {
           subTopicOptions.find(
             (option: any) => option.name === data.sub_topic
           ) ?? null,
+        media_url: data.media_url ?? '',
       });
     }
 
@@ -425,6 +427,7 @@ export default function AddQuestion() {
           subTopicOptions.find(
             (option: any) => option.name === data.sub_topic
           ) ?? null,
+          media_url: data.media_url ?? '',
       });
     } else {
       // api issue : Deleted question have [] data without remove from questions[ids..] in testlist

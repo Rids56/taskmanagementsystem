@@ -35,8 +35,7 @@ export const addQuestionSchema = z.object({
     })
     .nullable()
     .optional(),
-
-  // media_url: z.string().optional(),
+  media_url: z.string().nullable().optional(),
 });
 
 export type AddQuestionFormValues = z.infer<typeof addQuestionSchema>;

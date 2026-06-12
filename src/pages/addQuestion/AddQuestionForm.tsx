@@ -4,6 +4,7 @@ import {
   Button,
   FormHelperText,
   Grid,
+  IconButton,
   MenuItem,
   TextField,
   Typography,
@@ -11,11 +12,13 @@ import {
 import {
   Add as AddIcon,
   CancelOutlined,
+  CloudUpload,
   DeleteOutlineOutlined,
   // Download,
 } from '@mui/icons-material';
 
 import { Controller, useFormContext, useFormState } from 'react-hook-form';
+import { useRef } from 'react';
 import type { AddQuestionFormValues as IFormInput } from './model/addQuestion.schema';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Editor } from 'primereact/editor';
@@ -42,6 +45,8 @@ const AddQuestionForm = ({
 }: AddQuestionFormProps) => {
   const location = useLocation();
   const navigate = useNavigate();
+
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const rowData = location.state?.rowData;
   const returnTo = location.state?.returnTo;
@@ -306,6 +311,90 @@ const AddQuestionForm = ({
                 helperText={errors.explanation?.message}
                 {...field}
               />
+            )}
+          />
+        </Grid>
+
+        <Grid size={{ xs: 12 }}>
+          <Controller
+            name="media_url"
+            control={control}
+            render={({ field }) => (
+              <>
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept="image/*"
+                  style={{ display: 'none' }}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+
+                    const reader = new FileReader();
+
+                    reader.onload = () => {
+                      setValue('media_url', reader.result as string, {
+                        shouldDirty: true,
+                        shouldValidate: true,
+                      });
+                    };
+
+                    reader.readAsDataURL(file);
+                  }}
+                />
+
+                <Box sx={{ position: 'relative' }}>
+                  <TextField
+                    // sx={{ pr: 8 }}
+                    fullWidth
+                    label="Media URL"
+                    placeholder="Image URL or upload a file"
+                    error={!!errors.media_url}
+                    helperText={errors.media_url?.message}
+                    {...field}
+                    slotProps={{
+                      htmlInput: {
+                        style: {
+                          textOverflow: 'ellipsis',
+                          overflow: 'hidden',
+                          whiteSpace: 'nowrap',
+                        },
+                      },
+                    }}
+                    sx={{
+                      '& .MuiInputBase-input': {
+                        pr: 8, // reserve space for upload icon
+                      },
+                    }}
+                  />
+
+                  <IconButton
+                    onClick={() => fileRef.current?.click()}
+                    sx={{
+                      position: 'absolute',
+                      right: 8,
+                      top: 8,
+                      zIndex: 1,
+                    }}
+                  >
+                    <CloudUpload />
+                  </IconButton>
+                </Box>
+
+                {field.value ? (
+                  <Box sx={{ mt: 2 }}>
+                    <img
+                      src={field.value}
+                      alt="preview"
+                      style={{
+                        maxWidth: 240,
+                        maxHeight: 160,
+                        objectFit: 'contain',
+                      }}
+                    />
+                  </Box>
+                ) : null}
+              </>
             )}
           />
         </Grid>
