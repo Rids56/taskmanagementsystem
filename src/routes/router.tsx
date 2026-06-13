@@ -22,41 +22,46 @@ function RequireAuth() {
   return <Outlet />;
 }
 
-const router = createBrowserRouter([
+const router = createBrowserRouter(
+  [
+    {
+      path: '/',
+      element: <Navigate to="/dashboard" replace />,
+    },
+    {
+      path: '/login',
+      element: <Login />,
+    },
+    {
+      element: <RequireAuth />,
+      children: [
+        {
+          element: <MainLayout />,
+          children: [
+            {
+              path: '/dashboard',
+              element: <Dashboard />,
+            },
+            {
+              path: '/task-create',
+              element: <TaskCreate />,
+            },
+            {
+              path: '/task-create/add-question',
+              element: <AddQuestion />,
+            },
+          ],
+        },
+      ],
+    },
+    {
+      path: '*',
+      element: <NotFound />,
+    },
+  ],
   {
-    path: '/',
-    element: <Navigate to="/dashboard" replace />,
-  },
-  {
-    path: '/login',
-    element: <Login />,
-  },
-  {
-    element: <RequireAuth />,
-    children: [
-      {
-        element: <MainLayout />,
-        children: [
-          {
-            path: '/dashboard',
-            element: <Dashboard />,
-          },
-          {
-            path: '/task-create',
-            element: <TaskCreate />,
-          },
-          {
-            path: '/task-create/add-question',
-            element: <AddQuestion />,
-          },
-        ],
-      },
-    ],
-  },
-  {
-    path: '*',
-    element: <NotFound />,
-  },
-]);
+    basename: import.meta.env.BASE_URL,
+  }
+);
 
 export default router;
