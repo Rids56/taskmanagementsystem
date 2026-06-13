@@ -70,9 +70,10 @@ const AddQuestionForm = ({
 
   const questionId = getValues('id');
   const isExistingQuestion = !!questionId && questionId !== 'temp_id';
-  const canDelete =
-    !isViewMode &&
-    (isExistingQuestion || (rowData?.questions?.length ?? 0) >= questionNumber);
+  // Drive delete-availability from the live form id, not the frozen
+  // location.state snapshot. Mirrors the guard in AddQuestion.handleDeleteQuestions
+  // so the button is enabled exactly when a delete can actually fire.
+  const canDelete = !isViewMode && isExistingQuestion;
   const minRows = 8;
 
   // csv parsing helpers
@@ -465,8 +466,7 @@ const AddQuestionForm = ({
               Save & Continue
             </Button>
 
-            {(questionNumber != rowData?.questions?.length ||
-              questionNumber != menuListQuestions) &&
+            {questionNumber != menuListQuestions &&
               isExistingQuestion && (
                 <Button
                   type="button"

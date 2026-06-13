@@ -52,7 +52,12 @@ export default function AddQuestion() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  const rowData = location.state?.rowData;
+  // Seed once from the navigate-time snapshot into local, component-owned state.
+  // location.state is immutable and frozen at navigation time, so it can't be
+  // updated as questions are added/deleted. The live question list is tracked in
+  // the `questions` state below; this `rowData` only holds the static test config
+  // (topics, sub_topics, subject, id, total_questions).
+  const [rowData] = useState<any>(() => location.state?.rowData);
 
   const defaultQuestions = useMemo(
     () => rowData?.questions ?? [],
