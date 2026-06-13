@@ -1,12 +1,14 @@
 {
   "name": "react-boilerplate",
+  "homepage": "https://Rids56.github.io/taskmanagementsystem",
   "version": "1.0.0",
   "private": true,
   "scripts": {
     "start:web": "vite",
     "build:web": "tsc && vite build",
     "preview": "vite preview",
-    "format": "prettier --write \"src/**/*.{ts,tsx}\""
+    "format": "prettier --write \"src/**/*.{ts,tsx}\"",
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

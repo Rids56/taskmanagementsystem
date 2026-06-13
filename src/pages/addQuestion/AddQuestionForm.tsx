@@ -466,16 +466,15 @@ const AddQuestionForm = ({
               Save & Continue
             </Button>
 
-            {questionNumber != menuListQuestions &&
-              isExistingQuestion && (
-                <Button
-                  type="button"
-                  variant="contained"
-                  onClick={handleSubmit(onNext)}
-                >
-                  Next
-                </Button>
-              )}
+            {questionNumber != menuListQuestions && isExistingQuestion && (
+              <Button
+                type="button"
+                variant="contained"
+                onClick={handleSubmit(onNext)}
+              >
+                Next
+              </Button>
+            )}
           </Box>
         </Grid>
       </Grid>

@@ -79,6 +79,8 @@ export default function TaskCreate() {
   // States
   const rowDataRef = useRef<any>(null);
   const subjectInputRef = useRef<HTMLInputElement>(null);
+  // manage to control navigation after success from questions delete - exit test creation
+  const editTestSuccessRef = useRef<boolean>(false);
   const [snackbar, setSnackbar] = useState<{
     isOpen: boolean;
     mode: 'success' | 'error' | 'info' | 'warning';
@@ -246,13 +248,14 @@ export default function TaskCreate() {
   }, [addTestSuccess, addTestError]);
 
   useEffect(() => {
-    if (!isEmpty(editTestSuccess)) {
+    if (!isEmpty(editTestSuccess) && editTestSuccessRef?.current) {
       setSnackbar({
         isOpen: true,
         mode: 'success',
         msg: `Test updated successfully`,
       });
 
+      editTestSuccessRef.current = false;
       navigate('/task-create/add-question', {
         state: {
           ...(location.state?.mode && { mode: location.state.mode }),
@@ -263,6 +266,7 @@ export default function TaskCreate() {
     }
 
     if (editTestError) {
+      editTestSuccessRef.current = false;
       setSnackbar({
         isOpen: true,
         mode: 'error',
@@ -354,6 +358,7 @@ export default function TaskCreate() {
           }),
         };
 
+        editTestSuccessRef.current = true;
         dispatch(updateTestRequest({ id: editId, payload: finalPayload }));
       } else {
         const finalPayload = {
