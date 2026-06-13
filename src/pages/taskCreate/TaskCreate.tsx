@@ -78,6 +78,7 @@ export default function TaskCreate() {
 
   // States
   const rowDataRef = useRef<any>(null);
+  const subjectInputRef = useRef<HTMLInputElement>(null);
   const [snackbar, setSnackbar] = useState<{
     isOpen: boolean;
     mode: 'success' | 'error' | 'info' | 'warning';
@@ -122,6 +123,7 @@ export default function TaskCreate() {
   const watchedTopics = watch('topics');
 
   useEffect(() => {
+    subjectInputRef.current?.focus();
     // Get subjects
     if (subjects?.length === 0) {
       dispatch(getSubjectsRequest());
@@ -227,7 +229,7 @@ export default function TaskCreate() {
 
       navigate('/task-create/add-question', {
         state: {
-          ...(location.state.mode && { mode: location.state.mode }),
+          ...(location.state?.mode && { mode: location.state.mode }),
           rowData: { ...rowDataRef.current, id: addTestSuccess?.[0]?.id },
           id: addTestSuccess?.[0]?.id,
         },
@@ -253,7 +255,7 @@ export default function TaskCreate() {
 
       navigate('/task-create/add-question', {
         state: {
-          ...(location.state.mode && { mode: location.state.mode }),
+          ...(location.state?.mode && { mode: location.state.mode }),
           rowData: { ...rowDataRef.current },
           id: rowDataRef.current?.id,
         },
@@ -443,6 +445,7 @@ export default function TaskCreate() {
                         <Autocomplete
                           id="subject"
                           selectOnFocus
+                          openOnFocus={!isEditMode}
                           loading={subjectLoader}
                           value={field.value ?? null}
                           onChange={(_, value) => field.onChange(value)}
@@ -452,6 +455,7 @@ export default function TaskCreate() {
                           renderInput={(params) => (
                             <TextField
                               {...params}
+                              inputRef={subjectInputRef}
                               label="Choose from Drop-down"
                               error={!!errors.subject}
                               helperText={errors.subject?.message}

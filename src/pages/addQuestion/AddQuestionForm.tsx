@@ -30,6 +30,7 @@ interface AddQuestionFormProps {
   onClear?: () => void;
   onDelete: (values: IFormInput) => void;
   hasQuestions: boolean;
+  menuListQuestions: number;
   questionNumber: number;
   totalQuestions: number;
 }
@@ -40,6 +41,7 @@ const AddQuestionForm = ({
   onClear,
   onDelete,
   hasQuestions,
+  menuListQuestions,
   questionNumber,
   totalQuestions,
 }: AddQuestionFormProps) => {
@@ -227,12 +229,11 @@ const AddQuestionForm = ({
                     <Editor
                       value={field.value ?? ''}
                       onTextChange={(e) => {
-                        const html = e.htmlValue ?? '';
-                        const text = e.textValue?.trim() ?? '';
-
-                        const normalizedHtml = `<p>${text}</p>`;
-
-                        field.onChange(html === normalizedHtml ? text : html);
+                        // const html = e.htmlValue ?? '';
+                        // const text = e.textValue?.trim() ?? '';
+                        // const normalizedHtml = `<p>${text}</p>`;
+                        // field.onChange(html === normalizedHtml ? text : html);
+                        field.onChange(e.htmlValue ?? '');
                       }}
                       style={{
                         minHeight: `${minRows * 24}px`,
@@ -518,15 +519,17 @@ const AddQuestionForm = ({
               Save & Continue
             </Button>
 
-            {questionNumber != rowData?.questions?.length && (
-              <Button
-                type="button"
-                variant="contained"
-                onClick={handleSubmit(onNext)}
-              >
-                Next
-              </Button>
-            )}
+            {(questionNumber != rowData?.questions?.length ||
+              questionNumber != menuListQuestions) &&
+              isExistingQuestion && (
+                <Button
+                  type="button"
+                  variant="contained"
+                  onClick={handleSubmit(onNext)}
+                >
+                  Next
+                </Button>
+              )}
           </Box>
         </Grid>
       </Grid>

@@ -427,7 +427,7 @@ export default function AddQuestion() {
           subTopicOptions.find(
             (option: any) => option.name === data.sub_topic
           ) ?? null,
-          media_url: data.media_url ?? '',
+        media_url: data.media_url ?? '',
       });
     } else {
       // api issue : Deleted question have [] data without remove from questions[ids..] in testlist
@@ -637,6 +637,7 @@ export default function AddQuestion() {
                   onClear={handleClearQuestions}
                   onDelete={handleDeleteQuestions}
                   hasQuestions={questions.length > 0}
+                  menuListQuestions={questions?.length}
                   questionNumber={currentQuestionNumber}
                   totalQuestions={totalQuestions}
                 />
