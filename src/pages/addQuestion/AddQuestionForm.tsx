@@ -23,12 +23,15 @@ import type { AddQuestionFormValues as IFormInput } from './model/addQuestion.sc
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Editor } from 'primereact/editor';
 import CsvUploadButton from '../../components/CsvUploadButton';
+import { mapCsvRowToFormValues } from './csvQuestionMapper';
 
 interface AddQuestionFormProps {
   onAddAnother: (values: IFormInput) => void;
   onNext: (values: IFormInput) => void;
   onClear?: () => void;
   onDelete: (values: IFormInput) => void;
+  onCsvRowsParsed?: (rows: Record<string, any>[]) => void;
+  isCsvSaving?: boolean;
   hasQuestions: boolean;
   menuListQuestions: number;
   questionNumber: number;
@@ -40,6 +43,8 @@ const AddQuestionForm = ({
   onNext,
   onClear,
   onDelete,
+  onCsvRowsParsed,
+  isCsvSaving = false,
   hasQuestions,
   menuListQuestions,
   questionNumber,
@@ -71,84 +76,20 @@ const AddQuestionForm = ({
   const minRows = 8;
 
   // csv parsing helpers
-  const getSelectOption = (
-    field: 'topic' | 'sub_topic',
-    value?: string | null
-  ) => {
-    if (!value) return null;
-    const search = value.toString().trim().toLowerCase();
-    const options = field === 'topic' ? topicOptions : subTopicOptions;
-    return (
-      options.find(
-        (option: any) =>
-          option?.name?.toString().trim().toLowerCase() === search
-      ) ?? null
-    );
-  };
-  const normalizeCorrectOption = (value?: string) => {
-    if (!value) return '';
-    const normalized = value.toString().trim().toLowerCase();
-    if (
-      ['option1', 'option 1', '1', 'a', 'option a', 'opt1'].includes(normalized)
-    )
-      return 'option1';
-    if (
-      ['option2', 'option 2', '2', 'b', 'option b', 'opt2'].includes(normalized)
-    )
-      return 'option2';
-    if (
-      ['option3', 'option 3', '3', 'c', 'option c', 'opt3'].includes(normalized)
-    )
-      return 'option3';
-    if (
-      ['option4', 'option 4', '4', 'd', 'option d', 'opt4'].includes(normalized)
-    )
-      return 'option4';
-    return normalized.startsWith('option') ? normalized : '';
-  };
   const updateFormFromCsvRow = (row: Record<string, any>) => {
-    setValue(
-      'question',
-      row.question ?? row.Question ?? row.question_text ?? ''
+    const mappedValues = mapCsvRowToFormValues(
+      row,
+      topicOptions,
+      subTopicOptions,
+      getValues()
     );
 
-    setValue('option1', row.option1 ?? row.Option1 ?? row['Option 1'] ?? '');
-    setValue('option2', row.option2 ?? row.Option2 ?? row['Option 2'] ?? '');
-    setValue('option3', row.option3 ?? row.Option3 ?? row['Option 3'] ?? '');
-    setValue('option4', row.option4 ?? row.Option4 ?? row['Option 4'] ?? '');
-
-    setValue(
-      'correct_option',
-      normalizeCorrectOption(
-        row.correct_option ??
-          row.CorrectOption ??
-          row['Correct Option'] ??
-          row.answer ??
-          ''
-      )
-    );
-
-    setValue('explanation', row.explanation ?? row.Explanation ?? '');
-    setValue('difficulty', row.difficulty ?? row.Difficulty ?? '');
-
-    setValue(
-      'topic',
-      getSelectOption(
-        'topic',
-        row.topic ?? row.Topic ?? row['Topic Name'] ?? row['topic name']
-      )
-    );
-
-    setValue(
-      'sub_topic',
-      getSelectOption(
-        'sub_topic',
-        row.sub_topic ??
-          row.SubTopic ??
-          row['Sub Topic'] ??
-          row['sub_topic_name']
-      )
-    );
+    Object.entries(mappedValues).forEach(([key, value]) => {
+      setValue(key as keyof IFormInput, value as IFormInput[keyof IFormInput], {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+    });
   };
 
   return (
@@ -169,14 +110,14 @@ const AddQuestionForm = ({
               CSV
             </Button> */}
             <CsvUploadButton
-              disabled={canDelete}
+              disabled={canDelete || isCsvSaving}
+              acceptMultipleRows={!!onCsvRowsParsed}
               onCsvParsed={(row) => {
                 // form-specific logic
                 updateFormFromCsvRow(row);
               }}
-              // onRowsParsed={(rows) => {
-              //   console.log('multiple row', rows);
-              // }}
+              // onRowsParsed={(rows) => rows}
+              onRowsParsed={onCsvRowsParsed}
               buttonText="CSV"
             />
           </Box>
@@ -190,6 +131,7 @@ const AddQuestionForm = ({
             startIcon={<AddIcon />}
             sx={{ textTransform: 'none', width: 'fit-content' }}
             onClick={handleSubmit(onAddAnother)}
+            disabled={isCsvSaving}
           >
             Add Another Question
           </Button>
@@ -515,7 +457,11 @@ const AddQuestionForm = ({
 
         <Grid size={{ xs: 12, md: 6 }}>
           <Box sx={{ display: 'flex', justifyContent: 'end', gap: 1 }}>
-            <Button type="submit" variant="contained" disabled={isViewMode}>
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={isViewMode || isCsvSaving}
+            >
               Save & Continue
             </Button>
 

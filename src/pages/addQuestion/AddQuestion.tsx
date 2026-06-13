@@ -7,7 +7,7 @@ import {
   Snackbar,
   Typography,
 } from '@mui/material';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
@@ -37,6 +37,16 @@ import { getDirtyValues } from '../../utils/getDirtyValues';
 import PublishTestPage from './PublishTestPage';
 import { CheckCircle } from '@mui/icons-material';
 import { updateTestRequest } from '../../store/slices/testListSlice';
+import { mapCsvRowToFormValues } from './csvQuestionMapper';
+
+type CsvDraftState = {
+  startQuestionIndex: number;
+  drafts: IFormInput[];
+};
+
+type CsvSaveProgress = {
+  draftIndexes: number[];
+};
 
 export default function AddQuestion() {
   const dispatch = useAppDispatch();
@@ -67,6 +77,11 @@ export default function AddQuestion() {
     mode: 'success',
     msg: '',
   });
+  const [csvDrafts, setCsvDrafts] = useState<CsvDraftState | null>(null);
+  const [csvSaveProgress, setCsvSaveProgress] =
+    useState<CsvSaveProgress | null>(null);
+  const csvDraftsRef = useRef<CsvDraftState | null>(null);
+  const csvSaveProgressRef = useRef<CsvSaveProgress | null>(null);
 
   const initialValues = {
     id: 'temp_id',
@@ -96,6 +111,7 @@ export default function AddQuestion() {
   const {
     handleSubmit,
     reset,
+    getValues,
     formState: { dirtyFields },
   } = formContext;
 
@@ -124,6 +140,11 @@ export default function AddQuestion() {
   } = useSelector((state: RootState) => state.question);
 
   useEffect(() => {
+    csvDraftsRef.current = csvDrafts;
+    csvSaveProgressRef.current = csvSaveProgress;
+  }, [csvDrafts, csvSaveProgress]);
+
+  useEffect(() => {
     const validId = questions[currentQuestionNumber - 1];
     if (validId === 'temp_id' || validId == null) return;
 
@@ -140,7 +161,7 @@ export default function AddQuestion() {
       // reset({ ...initialValues });
       dispatch(resetQuestions());
     };
-  }, [activeQuestionIndex]);
+  }, [activeQuestionIndex, questions[activeQuestionIndex ?? -1]]);
 
   useEffect(() => {
     if (!isEmpty(getQuestionsSuccess)) {
@@ -169,13 +190,50 @@ export default function AddQuestion() {
 
   useEffect(() => {
     if (!isEmpty(addQuestionsSuccess)) {
+      const createdQuestionId = addQuestionsSuccess?.[0]?.id;
+      const activeSaveProgress = csvSaveProgressRef.current;
+      const activeDrafts = csvDraftsRef.current;
+
+      if (activeSaveProgress && activeDrafts) {
+        const createdQuestions = (addQuestionsSuccess as any[]) ?? [];
+        const { draftIndexes } = activeSaveProgress;
+
+        setQuestions((prev) => {
+          const updated = [...prev];
+          draftIndexes.forEach((draftIndex, responseIndex) => {
+            const questionSlotIndex =
+              activeDrafts.startQuestionIndex + draftIndex;
+            const createdId = createdQuestions[responseIndex]?.id;
+            if (createdId == null) return;
+            if (questionSlotIndex < updated.length) {
+              updated[questionSlotIndex] = createdId;
+            } else {
+              updated.push(createdId);
+            }
+          });
+          return updated;
+        });
+
+        csvSaveProgressRef.current = null;
+        setCsvSaveProgress(null);
+        setCsvDrafts(null);
+        csvDraftsRef.current = null;
+        setActiveQuestionIndex(
+          activeDrafts.startQuestionIndex + activeDrafts.drafts.length - 1
+        );
+        setSnackbar({
+          isOpen: true,
+          mode: 'success',
+          msg: `Successfully saved ${draftIndexes.length} questions from CSV`,
+        });
+        return;
+      }
+
       setSnackbar({
         isOpen: true,
         mode: 'success',
         msg: `Successfully Created ${addQuestionsSuccess?.length > 1 ? 'Questions' : 'Question'}`,
       });
-
-      const createdQuestionId = addQuestionsSuccess?.[0]?.id;
 
       setQuestions((prev) => {
         const updated = [...prev];
@@ -196,6 +254,9 @@ export default function AddQuestion() {
     }
 
     if (addQuestionsError) {
+      csvSaveProgressRef.current = null;
+      setCsvSaveProgress(null);
+
       setSnackbar({
         isOpen: true,
         mode: 'error',
@@ -278,15 +339,157 @@ export default function AddQuestion() {
     }
   }, [deleteQuestionsSuccess, deleteQuestionsError]);
 
+  const buildCreatePayload = (data: IFormInput) => {
+    const { id, ...restData } = data;
+    return {
+      ...restData,
+      ...(id !== 'temp_id' && { id }),
+      topic:
+        data.topic && typeof data.topic === 'object'
+          ? data.topic.id
+          : data.topic == null
+            ? ''
+            : data.topic,
+      sub_topic:
+        data.sub_topic && typeof data.sub_topic === 'object'
+          ? data.sub_topic.id
+          : data.sub_topic == null
+            ? ''
+            : data.sub_topic,
+    };
+  };
+
+  const dispatchCreateQuestion = (data: IFormInput) => {
+    const validation = FormSchema.safeParse(data);
+    if (!validation.success) {
+      const firstError =
+        validation.error.issues[0]?.message ?? 'Invalid question data';
+
+      csvSaveProgressRef.current = null;
+      setCsvSaveProgress(null);
+      setSnackbar({
+        isOpen: true,
+        mode: 'error',
+        msg: firstError,
+      });
+      return false;
+    }
+
+    dispatch(createQuestionsRequest({ questions: [buildCreatePayload(data)] }));
+    return true;
+  };
+
+  const isCsvDraftIndex = (index: number | null) => {
+    if (index === null || !csvDrafts) return false;
+    const draftIndex = index - csvDrafts.startQuestionIndex;
+    return (
+      draftIndex >= 0 &&
+      draftIndex < csvDrafts.drafts.length &&
+      questions[index] === 'temp_id'
+    );
+  };
+
+  const resetCsvState = () => {
+    if (!csvDraftsRef.current && !csvSaveProgressRef.current) return;
+    csvDraftsRef.current = null;
+    csvSaveProgressRef.current = null;
+    setCsvDrafts(null);
+    setCsvSaveProgress(null);
+  };
+
+  const updateCsvDraftAt = (index: number, values: IFormInput) => {
+    if (!csvDrafts) return;
+    const draftIndex = index - csvDrafts.startQuestionIndex;
+    if (draftIndex < 0 || draftIndex >= csvDrafts.drafts.length) return;
+
+    const updatedDrafts = {
+      ...csvDrafts,
+      drafts: csvDrafts.drafts.map((draft, i) =>
+        i === draftIndex ? values : draft
+      ),
+    };
+    csvDraftsRef.current = updatedDrafts;
+    setCsvDrafts(updatedDrafts);
+  };
+
+  const startCsvSaveQueue = (data: IFormInput) => {
+    if (!csvDrafts || activeQuestionIndex === null) return false;
+
+    const currentDraftIndex =
+      activeQuestionIndex - csvDrafts.startQuestionIndex;
+    if (currentDraftIndex < 0 || currentDraftIndex >= csvDrafts.drafts.length) {
+      return false;
+    }
+
+    const updatedDrafts = {
+      ...csvDrafts,
+      drafts: csvDrafts.drafts.map((draft, i) =>
+        i === currentDraftIndex ? data : draft
+      ),
+    };
+    csvDraftsRef.current = updatedDrafts;
+    setCsvDrafts(updatedDrafts);
+
+    const unsavedDraftIndexes = updatedDrafts.drafts
+      .map((_, i) => i)
+      .filter(
+        (i) => questions[updatedDrafts.startQuestionIndex + i] === 'temp_id'
+      );
+
+    if (unsavedDraftIndexes.length === 0) {
+      setSnackbar({
+        isOpen: true,
+        mode: 'info',
+        msg: 'All CSV questions are already saved',
+      });
+      return false;
+    }
+
+    // validate every unsaved draft up front; abort the whole batch if any fails
+    const payloads = [];
+    for (const draftIndex of unsavedDraftIndexes) {
+      const draft = updatedDrafts.drafts[draftIndex];
+      const validation = FormSchema.safeParse(draft);
+      if (!validation.success) {
+        const firstError =
+          validation.error.issues[0]?.message ?? 'Invalid question data';
+
+        csvSaveProgressRef.current = null;
+        setCsvSaveProgress(null);
+        setActiveQuestionIndex(updatedDrafts.startQuestionIndex + draftIndex);
+        reset(draft);
+        setSnackbar({
+          isOpen: true,
+          mode: 'error',
+          msg: `Question ${updatedDrafts.startQuestionIndex + draftIndex + 1}: ${firstError}`,
+        });
+        return false;
+      }
+      payloads.push(buildCreatePayload(draft));
+    }
+
+    const progress = { draftIndexes: unsavedDraftIndexes };
+
+    csvSaveProgressRef.current = progress;
+    setCsvSaveProgress(progress);
+
+    // single bulk request for all unsaved CSV drafts
+    dispatch(createQuestionsRequest({ questions: payloads }));
+    return true;
+  };
+
   const onSubmit = (data: IFormInput) => {
-    const dirtyData = getDirtyValues(data, dirtyFields);
-    if (Object.keys(dirtyData).length === 0) {
+    const isPendingCsvDraft = isCsvDraftIndex(activeQuestionIndex);
+    const dirtyData = isPendingCsvDraft
+      ? {}
+      : getDirtyValues(data, dirtyFields);
+
+    if (!isPendingCsvDraft && Object.keys(dirtyData).length === 0) {
       setSnackbar({
         isOpen: true,
         mode: 'error',
         msg: 'No fields to update',
       });
-      // setPendingSave(false);
       return;
     }
 
@@ -320,24 +523,67 @@ export default function AddQuestion() {
     }
 
     // POST API
-    const { id, ...restData } = data;
-    const createPayload = {
-      ...restData,
-      ...(id !== 'temp_id' && { id }),
-      topic:
-        data.topic && typeof data.topic === 'object'
-          ? data.topic.id
-          : data.topic == null
-            ? ''
-            : data.topic,
-      sub_topic:
-        data.sub_topic && typeof data.sub_topic === 'object'
-          ? data.sub_topic.id
-          : data.sub_topic == null
-            ? ''
-            : data.sub_topic,
+    if (isPendingCsvDraft && csvDrafts) {
+      if (!startCsvSaveQueue(data)) return;
+      setSnackbar({
+        isOpen: true,
+        mode: 'info',
+        msg: `Saving ${csvDrafts.drafts.length} questions from CSV...`,
+      });
+      return;
+    }
+
+    dispatchCreateQuestion(data);
+  };
+
+  const handleCsvRowsParsed = (rows: Record<string, any>[]) => {
+    if (!rows.length) return;
+
+    const currentValues = getValues();
+    const isCurrentEmpty =
+      !currentValues.question?.trim() &&
+      (activeQuestionIndex === null ||
+        questions[activeQuestionIndex] === 'temp_id');
+    const startQuestionIndex =
+      isCurrentEmpty && activeQuestionIndex !== null
+        ? activeQuestionIndex
+        : questions.length;
+
+    const mappedDrafts = rows.map((row) =>
+      mapCsvRowToFormValues(row, topicOptions, subTopicOptions, {
+        ...initialValues,
+      })
+    );
+
+    setQuestions((prev) => {
+      const updated = [...prev];
+
+      if (!isCurrentEmpty || activeQuestionIndex === null) {
+        mappedDrafts.forEach(() => updated.push('temp_id'));
+      } else {
+        for (let i = 1; i < mappedDrafts.length; i++) {
+          updated.push('temp_id');
+        }
+      }
+
+      return updated;
+    });
+
+    const draftState = {
+      startQuestionIndex,
+      drafts: mappedDrafts,
     };
-    dispatch(createQuestionsRequest({ questions: [createPayload] }));
+
+    csvDraftsRef.current = draftState;
+    setCsvDrafts(draftState);
+    setActiveQuestionIndex(startQuestionIndex);
+    reset(mappedDrafts[0]);
+
+    setSnackbar({
+      isOpen: true,
+      mode: 'info',
+      msg: `Loaded ${rows.length} questions from CSV. Click Save & Continue to create them.`,
+    });
   };
 
   const handleSaveContinue = (data: IFormInput) => {
@@ -376,9 +622,23 @@ export default function AddQuestion() {
   };
 
   const handleQuestionSelect = (/*_question: any, */ index: number) => {
-    reset({ ...initialValues });
-    // if (question === 'temp_id') reset({ ...initialValues });
+    if (
+      activeQuestionIndex !== null &&
+      isCsvDraftIndex(activeQuestionIndex) &&
+      !csvSaveProgress
+    ) {
+      updateCsvDraftAt(activeQuestionIndex, getValues());
+    }
+
     setActiveQuestionIndex(index);
+
+    if (isCsvDraftIndex(index) && csvDrafts) {
+      const draftIndex = index - csvDrafts.startQuestionIndex;
+      reset(csvDrafts.drafts[draftIndex]);
+      return;
+    }
+
+    reset({ ...initialValues });
   };
 
   const handleClearQuestions = () => {
@@ -392,6 +652,33 @@ export default function AddQuestion() {
       !isExistingQuestion || isExistingQuestion === 'temp_id';
 
     if (isNewQuestion) {
+      if (csvDrafts && isCsvDraftIndex(activeQuestionIndex)) {
+        const { startQuestionIndex, drafts } = csvDrafts;
+        const updatedQuestions = [
+          ...questions.slice(0, startQuestionIndex),
+          ...questions.slice(startQuestionIndex + drafts.length),
+        ];
+
+        resetCsvState();
+        setQuestions(updatedQuestions);
+
+        const nextIndex =
+          updatedQuestions.length === 0
+            ? null
+            : Math.min(startQuestionIndex, updatedQuestions.length - 1);
+
+        setActiveQuestionIndex(nextIndex);
+
+        if (nextIndex !== null && updatedQuestions[nextIndex] !== 'temp_id') {
+          return;
+        }
+
+        reset({ ...initialValues });
+        return;
+      }
+
+      resetCsvState();
+
       const updatedQuestions = questions.filter(
         (_, index) => index !== activeQuestionIndex
       );
@@ -405,17 +692,16 @@ export default function AddQuestion() {
 
       setActiveQuestionIndex(nextIndex);
 
-      // if (nextIndex !== null) {
-      //   reset(updatedQuestions[nextIndex]);
-      // } else {
-      //   reset(initialValues);
-      // }
+      if (nextIndex !== null && updatedQuestions[nextIndex] !== 'temp_id') {
+        return;
+      }
 
+      reset({ ...initialValues });
       return;
     }
 
-    // // Existing question -> discard changes only
-    // reset(currentQuestion);
+    resetCsvState();
+
     if (!isEmpty(getQuestionsSuccess)) {
       const data = getQuestionsSuccess?.[0] as any;
       reset({
@@ -636,6 +922,8 @@ export default function AddQuestion() {
                   onAddAnother={handleAddAnotherQuestion}
                   onClear={handleClearQuestions}
                   onDelete={handleDeleteQuestions}
+                  onCsvRowsParsed={handleCsvRowsParsed}
+                  isCsvSaving={!!csvSaveProgress}
                   hasQuestions={questions.length > 0}
                   menuListQuestions={questions?.length}
                   questionNumber={currentQuestionNumber}
