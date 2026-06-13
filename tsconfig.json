@@ -9,7 +9,8 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "skipLibCheck": true,
-    "ignoreDeprecations": "6.0",
+    "ignoreDeprecations": "5.0",
+    "noEmit": true,
     "baseUrl": ".",
     "paths": {
       "@/*": ["*"]
