@@ -1,12 +1,12 @@
-import { ChangeEvent } from 'react';
 import {
   FormControl,
-  FormLabel,
-  RadioGroup,
   FormControlLabel,
-  Radio,
   FormHelperText,
+  FormLabel,
+  Radio,
+  RadioGroup,
 } from '@mui/material';
+import { ChangeEvent } from 'react';
 
 interface DifficultyRadioProps {
   value?: string;

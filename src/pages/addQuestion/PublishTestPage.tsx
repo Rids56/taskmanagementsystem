@@ -1,23 +1,25 @@
-import { Alert, Box, Button, Container, Grid, Snackbar } from '@mui/material';
-import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useSelector } from 'react-redux';
-import { isEmpty } from 'lodash';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { updateTestRequest } from '../../store/slices/testListSlice';
-import { useAppDispatch } from '../../hooks';
-import { RootState } from '../../store/store';
-import { useEffect, useRef, useState } from 'react';
-import PublishSettings from './PublishSettings';
-import { getDirtyValues } from '../../utils/getDirtyValues';
-import {
-  publishSchema as FormSchema,
-  PublishFormValues as IFormInput,
-} from './model/publish.schema';
+import { Alert, Box, Button, Container, Grid, Snackbar } from '@mui/material';
 import dayjs from 'dayjs';
+import { isEmpty } from 'lodash';
+import { useEffect, useRef, useState } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
+import { useSelector } from 'react-redux';
+import { useLocation, useNavigate } from 'react-router-dom';
+
+import { useAppDispatch } from '../../hooks';
+import { updateTestRequest } from '../../store/slices/testListSlice';
+import { RootState } from '../../store/store';
+import { getDirtyValues } from '../../utils/getDirtyValues';
+import { IKeyedObject } from '../interfaceType';
+import {
+  PublishFormValues as IFormInput,
+  publishSchema as FormSchema,
+} from './model/publish.schema';
+import PublishSettings from './PublishSettings';
 
 interface PublishTestPageProps {
-  rowData: any;
+  rowData: IKeyedObject;
   onCancel: () => void;
 }
 
@@ -109,7 +111,7 @@ const PublishTestPage = ({ rowData, onCancel }: PublishTestPageProps) => {
   }, [editTestSuccess, editTestError]);
 
   const onSubmit = (data: IFormInput) => {
-    const dirtyData = getDirtyValues(data, dirtyFields);
+    const dirtyData = getDirtyValues(data, dirtyFields as IKeyedObject);
     if (Object.keys(dirtyData).length === 0) {
       setSnackbar({
         isOpen: true,
@@ -122,10 +124,12 @@ const PublishTestPage = ({ rowData, onCancel }: PublishTestPageProps) => {
     const payload = {
       status: data.publishMode === 'now' ? 'live' : 'draft',
 
-      scheduled_date:
-        data.publishMode === 'schedule'
-          ? data.scheduled_date?.format('YYYY-MM-DDTHH:mm:ss.SSSZ')
-          : null,
+      ...(data.publishMode === 'schedule' && {
+        scheduled_date: data.scheduled_date?.format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+        // data.publishMode === 'schedule'
+        //   ? data.scheduled_date?.format('YYYY-MM-DDTHH:mm:ss.SSSZ')
+        //   : null,
+      }),
 
       ...(data.expiry_date && {
         expiry_date:

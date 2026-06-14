@@ -1,23 +1,22 @@
-import { useState } from 'react';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
+import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined';
 import {
   AppBar,
   Avatar,
+  Badge,
   Box,
+  Divider,
   IconButton,
-  Toolbar,
-  Typography,
+  ListItemIcon,
   Menu,
   MenuItem,
-  Divider,
-  ListItemIcon,
-  Badge,
+  Toolbar,
+  Typography,
 } from '@mui/material';
-
-import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
-
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+
 import { useAppDispatch, useAppSelector } from '../../../hooks';
 import { logout } from '../../../store/slices/authSlice';
 

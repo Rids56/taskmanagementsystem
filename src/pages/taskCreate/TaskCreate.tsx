@@ -1,45 +1,43 @@
-import { useEffect, useState, useRef, useMemo } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
-  Box,
-  Breadcrumbs,
-  Link,
-  Typography,
-  Paper,
-  Snackbar,
   Alert,
   Autocomplete,
+  Box,
+  Breadcrumbs,
   Button,
   FormLabel,
   Grid,
+  Link,
+  Paper,
+  Snackbar,
   TextField,
+  Typography,
 } from '@mui/material';
-
-import { zodResolver } from '@hookform/resolvers/zod';
+import { isEmpty } from 'lodash';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
-import { useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import { useLocation, useNavigate } from 'react-router-dom';
 
-import {
-  getTestByIdRequest,
-  createTestRequest,
-  updateTestRequest,
-  resetTestList,
-} from '../../store/slices/testListSlice';
+import DifficultyRadio from '../../components/DifficultyRadio';
+import LoaderOverlay from '../../components/LoaderOverlay';
 import { getSubjectsRequest } from '../../store/slices/subjectSlice';
-import { getTopicsRequest } from '../../store/slices/topicSlice';
 import { getMultiSubTopicsRequest } from '../../store/slices/subTopicSlice';
-
+import {
+  createTestRequest,
+  getTestByIdRequest,
+  resetTestList,
+  updateTestRequest,
+} from '../../store/slices/testListSlice';
+import { getTopicsRequest } from '../../store/slices/topicSlice';
 import { RootState } from '../../store/store';
 import { getDirtyValues } from '../../utils/getDirtyValues';
-import LoaderOverlay from '../../components/LoaderOverlay';
-import TestTypeTabs from './TestTypeTabs';
-import { SubjectOption, TopicOption } from '../interfaceType';
+import { IKeyedObject, SubjectOption, TopicOption } from '../interfaceType';
 import {
   TaskCreateFormValues as IFormInput,
   taskCreateSchema as FormSchema,
 } from './model/create.schema';
-import DifficultyRadio from '../../components/DifficultyRadio';
-import { isEmpty } from 'lodash';
+import TestTypeTabs from './TestTypeTabs';
 
 export default function TaskCreate() {
   const dispatch = useDispatch();
@@ -77,7 +75,7 @@ export default function TaskCreate() {
   );
 
   // States
-  const rowDataRef = useRef<any>(null);
+  const rowDataRef = useRef<IKeyedObject>(null);
   const subjectInputRef = useRef<HTMLInputElement>(null);
   // manage to control navigation after success from questions delete - exit test creation
   const editTestSuccessRef = useRef<boolean>(false);
@@ -121,7 +119,7 @@ export default function TaskCreate() {
     formState: { errors, dirtyFields },
   } = formContext;
 
-  const watchedSubject = watch('subject');
+  const watchedSubject = watch('subject') as IKeyedObject | null;
   const watchedTopics = watch('topics');
 
   useEffect(() => {
@@ -147,7 +145,7 @@ export default function TaskCreate() {
 
     const selectedSubject = subjects.find(
       (s) => s.name === getOneTestSuccess.subject
-    );
+    ) as IKeyedObject;
 
     if (!selectedSubject) return;
 
@@ -185,7 +183,7 @@ export default function TaskCreate() {
       return;
 
     const topicIds = watchedTopics
-      .map((topic: any) => topic.id)
+      .map((topic: IKeyedObject) => topic.id)
       .filter(Boolean);
     if (topicIds.length) {
       dispatch(getMultiSubTopicsRequest(topicIds));
@@ -275,7 +273,7 @@ export default function TaskCreate() {
     }
   }, [editTestSuccess, editTestError]);
 
-  const hydrateEditForm = (getOneTestSuccess: any) => {
+  const hydrateEditForm = (getOneTestSuccess: IKeyedObject) => {
     // Validate that we have all necessary data
     if (!getOneTestSuccess || !subjects?.length) return;
 
@@ -293,7 +291,7 @@ export default function TaskCreate() {
     const topicNames = Array.isArray(getOneTestSuccess.topics)
       ? getOneTestSuccess.topics
       : [];
-    const selectedTopics = topics.filter((topic: any) =>
+    const selectedTopics = topics.filter((topic: IKeyedObject) =>
       topicNames.includes(topic.name)
     );
 
@@ -301,8 +299,8 @@ export default function TaskCreate() {
     const subTopicNames = Array.isArray(getOneTestSuccess.sub_topics)
       ? getOneTestSuccess.sub_topics
       : [];
-    const selectedSubTopics = (subTopics || []).filter((subTopic: any) =>
-      subTopicNames.includes(subTopic.name)
+    const selectedSubTopics = (subTopics || []).filter(
+      (subTopic: IKeyedObject) => subTopicNames.includes(subTopic.name)
     );
 
     // 4. Populate form with proper structure
@@ -316,13 +314,13 @@ export default function TaskCreate() {
           }
         : null,
 
-      topics: selectedTopics.map((topic: any) => ({
+      topics: selectedTopics.map((topic: IKeyedObject) => ({
         id: topic.id,
         name: topic.name,
         subject_id: topic.subject_id,
       })),
 
-      sub_topics: selectedSubTopics.map((subTopic: any) => ({
+      sub_topics: selectedSubTopics.map((subTopic: IKeyedObject) => ({
         id: subTopic.id,
         name: subTopic.name,
         topic_id: subTopic.topic_id,
@@ -335,7 +333,8 @@ export default function TaskCreate() {
   const onSubmit = async (data: IFormInput) => {
     if (Object.keys(errors).length === 0) {
       rowDataRef.current = data;
-      const dirtyData = getDirtyValues(data, dirtyFields);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const dirtyData = getDirtyValues(data, dirtyFields as any);
 
       if (Object.keys(dirtyData).length === 0) {
         setSnackbar({
@@ -351,10 +350,12 @@ export default function TaskCreate() {
           ...dirtyData,
           ...(dirtyData.subject && { subject: dirtyData.subject?.id ?? '' }),
           ...(dirtyData.topics && {
-            topics: (dirtyData.topics ?? []).map((t: any) => t.id),
+            topics: (dirtyData.topics ?? []).map((t: IKeyedObject) => t.id),
           }),
           ...(dirtyData.sub_topics && {
-            sub_topics: (dirtyData.sub_topics ?? []).map((s: any) => s.id),
+            sub_topics: (dirtyData.sub_topics ?? []).map(
+              (s: IKeyedObject) => s.id
+            ),
           }),
         };
 
@@ -364,8 +365,8 @@ export default function TaskCreate() {
         const finalPayload = {
           ...data,
           subject: data.subject?.id ?? '',
-          topics: (data.topics ?? []).map((t: any) => t.id),
-          sub_topics: (data.sub_topics ?? []).map((s: any) => s.id),
+          topics: (data.topics ?? []).map((t: IKeyedObject) => t.id),
+          sub_topics: (data.sub_topics ?? []).map((s: IKeyedObject) => s.id),
         };
         dispatch(createTestRequest(finalPayload));
       }
@@ -794,8 +795,13 @@ export default function TaskCreate() {
                           Cancel
                         </Button>
                         {isEditMode &&
-                          Object.keys(getDirtyValues(getValues(), dirtyFields))
-                            .length === 0 && (
+                          Object.keys(
+                            getDirtyValues(
+                              getValues(),
+                              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                              dirtyFields as any
+                            )
+                          ).length === 0 && (
                             <Button
                               variant="outlined"
                               onClick={() => {

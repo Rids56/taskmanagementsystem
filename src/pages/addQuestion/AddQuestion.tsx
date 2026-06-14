@@ -1,3 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { zodResolver } from '@hookform/resolvers/zod';
+import { CheckCircle } from '@mui/icons-material';
+import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
+import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded';
 import {
   Alert,
   Box,
@@ -7,37 +12,33 @@ import {
   Snackbar,
   Typography,
 } from '@mui/material';
+import { isEmpty } from 'lodash';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-
-import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
-import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded';
-
-import AddQuestionForm from './AddQuestionForm';
-
-import {
-  addQuestionSchema as FormSchema,
-  AddQuestionFormValues as IFormInput,
-} from './model/addQuestion.schema';
+import { useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
+
+import LoaderOverlay from '../../components/LoaderOverlay';
 import { useAppDispatch } from '../../hooks';
 import {
-  getQuestionsRequest,
   createQuestionsRequest,
+  deleteQuestionsRequest,
+  getQuestionsRequest,
   resetQuestions,
   updateQuestionsRequest,
-  deleteQuestionsRequest,
 } from '../../store/slices/questionSlice';
-import TestInfoCard from './TestInfoCard';
-import { RootState } from '../../store/store';
-import { useSelector } from 'react-redux';
-import { isEmpty } from 'lodash';
-import { getDirtyValues } from '../../utils/getDirtyValues';
-import PublishTestPage from './PublishTestPage';
-import { CheckCircle } from '@mui/icons-material';
 import { updateTestRequest } from '../../store/slices/testListSlice';
+import { RootState } from '../../store/store';
+import { getDirtyValues } from '../../utils/getDirtyValues';
+import { IKeyedObject } from '../interfaceType';
+import AddQuestionForm from './AddQuestionForm';
 import { mapCsvRowToFormValues } from './csvQuestionMapper';
+import {
+  AddQuestionFormValues as IFormInput,
+  addQuestionSchema as FormSchema,
+} from './model/addQuestion.schema';
+import PublishTestPage from './PublishTestPage';
+import TestInfoCard from './TestInfoCard';
 
 type CsvDraftState = {
   startQuestionIndex: number;
@@ -124,22 +125,22 @@ export default function AddQuestion() {
   const {
     add: {
       data: addQuestionsSuccess,
-      // loading: addQuestionsLoader,
+      loading: addQuestionsLoader,
       error: addQuestionsError,
     },
     edit: {
       data: editQuestionsSuccess,
-      // loading: editQuestionsLoader,
+      loading: editQuestionsLoader,
       error: editQuestionsError,
     },
     get: {
       data: getQuestionsSuccess,
-      // loading: getQuestionsLoader,
+      loading: getQuestionsLoader,
       error: getQuestionsError,
     },
     delete: {
       data: deleteQuestionsSuccess,
-      // loading: deleteQuestionsLoader,
+      loading: deleteQuestionsLoader,
       error: deleteQuestionsError,
     },
   } = useSelector((state: RootState) => state.question);
@@ -200,7 +201,7 @@ export default function AddQuestion() {
       const activeDrafts = csvDraftsRef.current;
 
       if (activeSaveProgress && activeDrafts) {
-        const createdQuestions = (addQuestionsSuccess as any[]) ?? [];
+        const createdQuestions = (addQuestionsSuccess as IKeyedObject[]) ?? [];
         const { draftIndexes } = activeSaveProgress;
 
         setQuestions((prev) => {
@@ -450,7 +451,7 @@ export default function AddQuestion() {
       return false;
     }
 
-    // validate every unsaved draft up front; abort the whole batch if any fails
+    // validate every unsaved draft up front; abort the whole batch if IKeyedObject fails
     const payloads = [];
     for (const draftIndex of unsavedDraftIndexes) {
       const draft = updatedDrafts.drafts[draftIndex];
@@ -487,7 +488,7 @@ export default function AddQuestion() {
     const isPendingCsvDraft = isCsvDraftIndex(activeQuestionIndex);
     const dirtyData = isPendingCsvDraft
       ? {}
-      : getDirtyValues(data, dirtyFields);
+      : getDirtyValues(data, dirtyFields as any);
 
     if (!isPendingCsvDraft && Object.keys(dirtyData).length === 0) {
       setSnackbar({
@@ -541,7 +542,7 @@ export default function AddQuestion() {
     dispatchCreateQuestion(data);
   };
 
-  const handleCsvRowsParsed = (rows: Record<string, any>[]) => {
+  const handleCsvRowsParsed = (rows: Record<string, IKeyedObject>[]) => {
     if (!rows.length) return;
 
     const currentValues = getValues();
@@ -614,7 +615,7 @@ export default function AddQuestion() {
     }
   };
 
-  const handleNext = (_data: IFormInput) => {
+  const handleNext = (/* data: IFormInput */) => {
     // onSubmit(data);
     reset({ ...initialValues });
 
@@ -626,7 +627,9 @@ export default function AddQuestion() {
     }
   };
 
-  const handleQuestionSelect = (/*_question: any, */ index: number) => {
+  const handleQuestionSelect = (
+    /*_question: IKeyedObject, */ index: number
+  ) => {
     if (
       activeQuestionIndex !== null &&
       isCsvDraftIndex(activeQuestionIndex) &&
@@ -708,15 +711,16 @@ export default function AddQuestion() {
     resetCsvState();
 
     if (!isEmpty(getQuestionsSuccess)) {
-      const data = getQuestionsSuccess?.[0] as any;
+      const data = getQuestionsSuccess?.[0] as IKeyedObject;
       reset({
         ...data,
         topic:
-          topicOptions.find((option: any) => option.name === data.topic) ??
-          null,
+          topicOptions.find(
+            (option: IKeyedObject) => option.name === data.topic
+          ) ?? null,
         sub_topic:
           subTopicOptions.find(
-            (option: any) => option.name === data.sub_topic
+            (option: IKeyedObject) => option.name === data.sub_topic
           ) ?? null,
         media_url: data.media_url ?? '',
       });
@@ -758,6 +762,12 @@ export default function AddQuestion() {
     setPageMode('publish');
   };
 
+  const showLoader =
+    addQuestionsLoader ||
+    editQuestionsLoader ||
+    getQuestionsLoader ||
+    deleteQuestionsLoader;
+
   return (
     <FormProvider {...formContext}>
       <Box>
@@ -773,171 +783,178 @@ export default function AddQuestion() {
           </Button>
         </Box>
 
-        <Box
-          sx={{
-            display: 'grid',
-            gap: 2,
-            gridTemplateColumns: {
-              xs: '1fr',
-              lg: '250px minmax(0, 1fr)',
-            },
-          }}
-        >
-          <Paper
-            elevation={0}
+        <LoaderOverlay loading={showLoader}>
+          <Box
             sx={{
-              p: 1,
-              borderRadius: 1,
+              display: 'grid',
+              gap: 2,
+              gridTemplateColumns: {
+                xs: '1fr',
+                lg: '250px minmax(0, 1fr)',
+              },
             }}
           >
-            <Typography variant="subtitle2" color="text.secondary">
-              Question creation
-            </Typography>
-            <Typography variant="h6" sx={{ mt: 1, fontWeight: 700 }}>
-              {/* Question {currentQuestionNumber}/{totalQuestions} */}
-              Total Questions {totalQuestions}
-            </Typography>
-
-            <Box
-              sx={{ mt: 3, display: 'flex', flexDirection: 'column', gap: 1 }}
+            <Paper
+              elevation={0}
+              sx={{
+                p: 1,
+                borderRadius: 1,
+              }}
             >
-              {questions.length ? (
-                questions.map((_question: any, index: number) => {
-                  const isActive = activeQuestionIndex === index;
+              <Typography variant="subtitle2" color="text.secondary">
+                Question creation
+              </Typography>
+              <Typography variant="h6" sx={{ mt: 1, fontWeight: 700 }}>
+                {/* Question {currentQuestionNumber}/{totalQuestions} */}
+                Total Questions {totalQuestions}
+              </Typography>
 
-                  return (
-                    <Box
-                      key={index}
-                      onClick={() => handleQuestionSelect(/*question, */ index)}
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        px: 2,
-                        py: 0.75,
-                        borderRadius: '18px',
-                        border: '2px solid',
-                        borderColor: isActive ? '#9EE2BE' : '#E5E7EB',
-                        bgcolor: isActive ? '#F3FFF8' : '#FFFFFF',
-                        cursor: 'pointer',
-                        transition: 'all .2s ease',
-                      }}
-                    >
-                      <CheckCircleRoundedIcon
-                        sx={{
-                          fontSize: 22,
-                          color: isActive ? '#00A651' : '#D1D5DB',
-                          mr: 2,
-                        }}
-                      />
+              {/* Left Question list Section */}
+              <Box
+                sx={{ mt: 3, display: 'flex', flexDirection: 'column', gap: 1 }}
+              >
+                {questions.length ? (
+                  questions.map((_question: IKeyedObject, index: number) => {
+                    const isActive = activeQuestionIndex === index;
 
-                      <Typography
+                    return (
+                      <Box
+                        key={index}
+                        onClick={() =>
+                          handleQuestionSelect(/*question, */ index)
+                        }
                         sx={{
-                          flex: 1,
-                          fontSize: 16,
-                          fontWeight: 500,
-                          color: isActive ? '#00A651' : '#475569',
+                          display: 'flex',
+                          alignItems: 'center',
+                          px: 2,
+                          py: 0.75,
+                          borderRadius: '18px',
+                          border: '2px solid',
+                          borderColor: isActive ? '#9EE2BE' : '#E5E7EB',
+                          bgcolor: isActive ? '#F3FFF8' : '#FFFFFF',
+                          cursor: 'pointer',
+                          transition: 'all .2s ease',
                         }}
                       >
-                        Question {index + 1}
-                      </Typography>
+                        <CheckCircleRoundedIcon
+                          sx={{
+                            fontSize: 22,
+                            color: isActive ? '#00A651' : '#D1D5DB',
+                            mr: 2,
+                          }}
+                        />
 
-                      <ChevronRightRoundedIcon
-                        sx={{
-                          color: isActive ? '#9EE2BE' : '#E5E7EB',
-                          fontSize: 24,
-                        }}
-                      />
-                    </Box>
-                  );
-                })
-              ) : (
-                <Paper
-                  elevation={0}
-                  sx={{
-                    p: 2,
-                    borderRadius: 2,
-                    border: 1,
-                    borderColor: 'divider',
-                  }}
-                >
-                  <Typography color="text.secondary">
-                    No questions added yet. Start by filling the question form.
-                  </Typography>
-                </Paper>
-              )}
-            </Box>
-          </Paper>
+                        <Typography
+                          sx={{
+                            flex: 1,
+                            fontSize: 16,
+                            fontWeight: 500,
+                            color: isActive ? '#00A651' : '#475569',
+                          }}
+                        >
+                          Question {index + 1}
+                        </Typography>
 
-          <Paper
-            sx={{
-              p: 3,
-              borderRadius: 1,
-            }}
-          >
-            {pageMode === 'publish' && (
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 2,
-                  mb: 3,
-                  flexWrap: 'wrap',
-                }}
-              >
-                <Typography
-                  variant="h6"
-                  sx={{
-                    fontWeight: 700,
-                    mb: 0,
-                  }}
-                >
-                  Test Created
-                </Typography>
-
-                <Button
-                  color="success"
-                  variant="outlined"
-                  startIcon={<CheckCircle />}
-                  sx={{
-                    textTransform: 'none',
-                    borderColor: '#9EE2BE',
-                    bgcolor: '#F3FFF8',
-                    px: 3,
-                    py: 1,
-                    borderRadius: 3,
-                    width: 'auto',
-                  }}
-                >
-                  {`All ${totalQuestions} Questions Done`}
-                </Button>
+                        <ChevronRightRoundedIcon
+                          sx={{
+                            color: isActive ? '#9EE2BE' : '#E5E7EB',
+                            fontSize: 24,
+                          }}
+                        />
+                      </Box>
+                    );
+                  })
+                ) : (
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      p: 2,
+                      borderRadius: 2,
+                      border: 1,
+                      borderColor: 'divider',
+                    }}
+                  >
+                    <Typography color="text.secondary">
+                      No questions added yet. Start by filling the question
+                      form.
+                    </Typography>
+                  </Paper>
+                )}
               </Box>
-            )}
+            </Paper>
 
-            <TestInfoCard rowData={rowData} />
+            {/* Right Section */}
+            <Paper
+              sx={{
+                p: 3,
+                borderRadius: 1,
+              }}
+            >
+              {pageMode === 'publish' && (
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 2,
+                    mb: 3,
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontWeight: 700,
+                      mb: 0,
+                    }}
+                  >
+                    Test Created
+                  </Typography>
 
-            {pageMode === 'publish' ? (
-              <PublishTestPage
-                rowData={rowData}
-                onCancel={() => setPageMode('questions')}
-              />
-            ) : (
-              <form onSubmit={handleSubmit(handleSaveContinue)}>
-                <AddQuestionForm
-                  onNext={handleNext}
-                  onAddAnother={handleAddAnotherQuestion}
-                  onClear={handleClearQuestions}
-                  onDelete={handleDeleteQuestions}
-                  onCsvRowsParsed={handleCsvRowsParsed}
-                  isCsvSaving={!!csvSaveProgress}
-                  hasQuestions={questions.length > 0}
-                  menuListQuestions={questions?.length}
-                  questionNumber={currentQuestionNumber}
-                  totalQuestions={totalQuestions}
+                  <Button
+                    color="success"
+                    variant="outlined"
+                    startIcon={<CheckCircle />}
+                    sx={{
+                      textTransform: 'none',
+                      borderColor: '#9EE2BE',
+                      bgcolor: '#F3FFF8',
+                      px: 3,
+                      py: 1,
+                      borderRadius: 3,
+                      width: 'auto',
+                    }}
+                  >
+                    {`All ${totalQuestions} Questions Done`}
+                  </Button>
+                </Box>
+              )}
+
+              <TestInfoCard rowData={rowData} />
+
+              {pageMode === 'publish' ? (
+                <PublishTestPage
+                  rowData={rowData}
+                  onCancel={() => setPageMode('questions')}
                 />
-              </form>
-            )}
-          </Paper>
-        </Box>
+              ) : (
+                <form onSubmit={handleSubmit(handleSaveContinue)}>
+                  <AddQuestionForm
+                    onNext={handleNext}
+                    onAddAnother={handleAddAnotherQuestion}
+                    onClear={handleClearQuestions}
+                    onDelete={handleDeleteQuestions}
+                    onCsvRowsParsed={handleCsvRowsParsed}
+                    isCsvSaving={!!csvSaveProgress}
+                    hasQuestions={questions.length > 0}
+                    menuListQuestions={questions?.length}
+                    questionNumber={currentQuestionNumber}
+                    totalQuestions={totalQuestions}
+                  />
+                </form>
+              )}
+            </Paper>
+          </Box>
+        </LoaderOverlay>
 
         <Snackbar
           open={snackbar?.isOpen}

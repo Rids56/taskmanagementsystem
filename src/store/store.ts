@@ -1,12 +1,13 @@
 import { configureStore } from '@reduxjs/toolkit';
 import createSagaMiddleware from 'redux-saga';
-import subjectsReducer from './slices/subjectSlice';
-import topicReducer from './slices/topicSlice';
-import subTopicReducer from './slices/subTopicSlice';
-import testListReducer from './slices/testListSlice';
-import questionReducer from './slices/questionSlice';
+
 import authReducer from '../store/slices/authSlice';
 import rootSaga from './sagas/rootSaga';
+import questionReducer from './slices/questionSlice';
+import subjectsReducer from './slices/subjectSlice';
+import subTopicReducer from './slices/subTopicSlice';
+import testListReducer from './slices/testListSlice';
+import topicReducer from './slices/topicSlice';
 
 const sagaMiddleware = createSagaMiddleware();
 

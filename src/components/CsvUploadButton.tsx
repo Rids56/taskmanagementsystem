@@ -1,11 +1,13 @@
-import { useRef, type ChangeEvent } from 'react';
-import { Button } from '@mui/material';
 import { Download as DownloadIcon } from '@mui/icons-material';
+import { Button } from '@mui/material';
+import { type ChangeEvent, useRef } from 'react';
 import { usePapaParse } from 'react-papaparse';
 
+import { IKeyedObject } from '../pages/interfaceType';
+
 export interface CsvUploadButtonProps {
-  onCsvParsed: (row: Record<string, any>) => void;
-  onRowsParsed?: (rows: Record<string, any>[]) => void;
+  onCsvParsed: (row: Record<string, IKeyedObject>) => void;
+  onRowsParsed?: (rows: Record<string, IKeyedObject>[]) => void;
   acceptMultipleRows?: boolean;
   buttonText?: string;
   variant?: 'text' | 'outlined' | 'contained';
@@ -47,7 +49,7 @@ const CsvUploadButton = ({
         skipEmptyLines: true,
         complete: (results) => {
           const rows = Array.isArray(results?.data)
-            ? (results.data as Record<string, any>[])
+            ? (results.data as Record<string, IKeyedObject>[])
             : [];
 
           if (!rows.length) return;

@@ -1,23 +1,25 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { call, put, takeLatest } from 'redux-saga/effects';
+
 import {
   createQuestionsBulkApi,
-  updateQuestionsBulkApi,
-  getQuestionsBulkApi,
   deleteQuestionsBulkApi,
+  getQuestionsBulkApi,
+  updateQuestionsBulkApi,
 } from '../api/questionApi';
 import {
   createQuestionsFailure,
   createQuestionsRequest,
   createQuestionsSuccess,
-  updateQuestionsFailure,
-  updateQuestionsRequest,
-  updateQuestionsSuccess,
-  getQuestionsFailure,
-  getQuestionsRequest,
-  getQuestionsSuccess,
   deleteQuestionsFailure,
   deleteQuestionsRequest,
   deleteQuestionsSuccess,
+  getQuestionsFailure,
+  getQuestionsRequest,
+  getQuestionsSuccess,
+  updateQuestionsFailure,
+  updateQuestionsRequest,
+  updateQuestionsSuccess,
 } from '../slices/questionSlice';
 
 function* createQuestionsWorker(

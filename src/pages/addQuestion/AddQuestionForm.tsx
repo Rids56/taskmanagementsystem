@@ -1,4 +1,10 @@
 import {
+  Add as AddIcon,
+  CancelOutlined,
+  CloudUpload,
+  DeleteOutlineOutlined,
+} from '@mui/icons-material';
+import {
   Autocomplete,
   Box,
   Button,
@@ -9,27 +15,21 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import {
-  Add as AddIcon,
-  CancelOutlined,
-  CloudUpload,
-  DeleteOutlineOutlined,
-  // Download,
-} from '@mui/icons-material';
-
-import { Controller, useFormContext, useFormState } from 'react-hook-form';
-import { useRef } from 'react';
-import type { AddQuestionFormValues as IFormInput } from './model/addQuestion.schema';
-import { useLocation, useNavigate } from 'react-router-dom';
 import { Editor } from 'primereact/editor';
+import { useRef } from 'react';
+import { Controller, useFormContext, useFormState } from 'react-hook-form';
+import { useLocation, useNavigate } from 'react-router-dom';
+
 import CsvUploadButton from '../../components/CsvUploadButton';
 import { mapCsvRowToFormValues } from './csvQuestionMapper';
+import type { AddQuestionFormValues as IFormInput } from './model/addQuestion.schema';
 
 interface AddQuestionFormProps {
   onAddAnother: (values: IFormInput) => void;
   onNext: (values: IFormInput) => void;
   onClear?: () => void;
   onDelete: (values: IFormInput) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onCsvRowsParsed?: (rows: Record<string, any>[]) => void;
   isCsvSaving?: boolean;
   hasQuestions: boolean;
@@ -77,6 +77,7 @@ const AddQuestionForm = ({
   const minRows = 8;
 
   // csv parsing helpers
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateFormFromCsvRow = (row: Record<string, any>) => {
     const mappedValues = mapCsvRowToFormValues(
       row,
@@ -171,12 +172,19 @@ const AddQuestionForm = ({
                   >
                     <Editor
                       value={field.value ?? ''}
+                      // onTextChange={(e) => {
+                      //   // const html = e.htmlValue ?? '';
+                      //   // const text = e.textValue?.trim() ?? '';
+                      //   // const normalizedHtml = `<p>${text}</p>`;
+                      //   // field.onChange(html === normalizedHtml ? text : html);
+                      //   field.onChange(e.htmlValue ?? '');
+                      // }}
                       onTextChange={(e) => {
-                        // const html = e.htmlValue ?? '';
-                        // const text = e.textValue?.trim() ?? '';
-                        // const normalizedHtml = `<p>${text}</p>`;
-                        // field.onChange(html === normalizedHtml ? text : html);
-                        field.onChange(e.htmlValue ?? '');
+                        const newValue = e.htmlValue ?? '';
+
+                        if (newValue !== field.value) {
+                          field.onChange(newValue);
+                        }
                       }}
                       style={{
                         minHeight: `${minRows * 24}px`,

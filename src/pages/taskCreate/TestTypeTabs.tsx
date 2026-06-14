@@ -1,5 +1,6 @@
-import { Tabs, Tab, Box } from '@mui/material';
+import { Box, Tab, Tabs } from '@mui/material';
 import { useFormContext } from 'react-hook-form';
+
 import { TaskCreateFormValues as IFormInput } from './model/create.schema';
 
 export const tabMapping = [
