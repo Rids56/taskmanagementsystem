@@ -52,6 +52,8 @@ export const taskCreateSchema = z.object({
   //     message: 'Please select at least one sub-topic',
   //   }),
 
+  questions: z.array(z.string().uuid()).nullable().optional(),
+
   difficulty: z.enum(['easy', 'medium', 'hard'], {
     error: 'Difficulty Level is required',
   }),

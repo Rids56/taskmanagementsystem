@@ -58,7 +58,7 @@ export default function AddQuestion() {
   // updated as questions are added/deleted. The live question list is tracked in
   // the `questions` state below; this `rowData` only holds the static test config
   // (topics, sub_topics, subject, id, total_questions).
-  const [rowData] = useState<any>(() => location.state?.rowData);
+  const [rowData] = useState<any>(location.state?.rowData);
 
   const defaultQuestions = useMemo(
     () => rowData?.questions ?? [],
@@ -277,6 +277,19 @@ export default function AddQuestion() {
         isOpen: true,
         mode: 'success',
         msg: `Successfully updated ${editQuestionsSuccess?.length > 1 ? 'Questions' : 'Question'}`,
+      });
+
+      const data = editQuestionsSuccess?.[0] as any;
+      reset({
+        ...data,
+        topic:
+          topicOptions.find((option: any) => option.name === data.topic) ??
+          null,
+        sub_topic:
+          subTopicOptions.find(
+            (option: any) => option.name === data.sub_topic
+          ) ?? null,
+        media_url: data.media_url ?? '',
       });
     }
 
