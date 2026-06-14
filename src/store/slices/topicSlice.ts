@@ -22,7 +22,7 @@ const topicSlice = createSlice({
   name: 'topics',
   initialState,
   reducers: {
-    getTopicsRequest: (state, _action: PayloadAction<string>) => {
+    getTopicsRequest: (state /* action: PayloadAction<string> */) => {
       state.loading = true;
       state.error = null;
     },

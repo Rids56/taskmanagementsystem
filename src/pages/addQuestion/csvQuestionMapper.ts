@@ -39,6 +39,7 @@ const normalizeCorrectOption = (value?: string) => {
 };
 
 export const mapCsvRowToFormValues = (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   row: Record<string, any>,
   topicOptions: TopicOption[],
   subTopicOptions: SubTopicOption[],

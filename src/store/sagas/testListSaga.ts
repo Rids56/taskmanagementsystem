@@ -1,27 +1,29 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { call, put, takeLatest } from 'redux-saga/effects';
+
 import {
-  getTestListApi,
-  getTestByIdApi,
   createTestApi,
-  updateTestApi,
   deleteTestApi,
+  getTestByIdApi,
+  getTestListApi,
+  updateTestApi,
 } from '../api/testList';
 import {
-  getTestListRequest,
-  getTestListSuccess,
-  getTestListFailure,
-  getTestByIdRequest,
-  getTestByIdSuccess,
-  getTestByIdFailure,
+  createTestFailure,
   createTestRequest,
   createTestSuccess,
-  createTestFailure,
-  updateTestRequest,
-  updateTestSuccess,
-  updateTestFailure,
+  deleteTestFailure,
   deleteTestRequest,
   deleteTestSuccess,
-  deleteTestFailure,
+  getTestByIdFailure,
+  getTestByIdRequest,
+  getTestByIdSuccess,
+  getTestListFailure,
+  getTestListRequest,
+  getTestListSuccess,
+  updateTestFailure,
+  updateTestRequest,
+  updateTestSuccess,
 } from '../slices/testListSlice';
 
 function* getTestListWorker(): Generator<any, void, any> {

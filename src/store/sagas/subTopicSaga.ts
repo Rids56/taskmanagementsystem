@@ -1,15 +1,17 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { call, put, takeLatest } from 'redux-saga/effects';
+
 import {
-  getyMultiSubTopicsBTopicApi,
   getSubTopicsByTopicApi,
+  getyMultiSubTopicsBTopicApi,
 } from '../api/subTopicApi';
 import {
-  getSubTopicsRequest,
-  getSubTopicsSuccess,
-  getSubTopicsFailure,
+  getMultiSubTopicsFailure,
   getMultiSubTopicsRequest,
   getMultiSubTopicsSuccess,
-  getMultiSubTopicsFailure,
+  getSubTopicsFailure,
+  getSubTopicsRequest,
+  getSubTopicsSuccess,
 } from '../slices/subTopicSlice';
 
 function* getSubTopicsWorker(

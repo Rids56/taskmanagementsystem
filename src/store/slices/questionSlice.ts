@@ -1,4 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+
+import { IKeyedObject } from '../../pages/interfaceType';
 
 export interface QuestionItem {
   id: number | string;
@@ -11,8 +15,8 @@ export interface QuestionItem {
   correct_option: string;
   explanation?: string;
   difficulty?: string;
-  topic?: any;
-  sub_topic?: any;
+  topic?: IKeyedObject;
+  sub_topic?: IKeyedObject;
   test_id?: string | number;
 }
 
@@ -20,22 +24,22 @@ interface QuestionState {
   add: {
     data: QuestionItem[];
     loading: boolean;
-    error: any | null;
+    error: IKeyedObject | null;
   };
   edit: {
     data: QuestionItem[];
     loading: boolean;
-    error: any | null;
+    error: IKeyedObject | null;
   };
   get: {
     data: QuestionItem[];
     loading: boolean;
-    error: any | null;
+    error: IKeyedObject | null;
   };
   delete: {
     data: QuestionItem[];
     loading: boolean;
-    error: any | null;
+    error: IKeyedObject | null;
   };
 }
 
@@ -74,7 +78,7 @@ const questionSlice = createSlice({
       state.add.loading = false;
       state.add.data = action.payload;
     },
-    createQuestionsFailure: (state, action: PayloadAction<any>) => {
+    createQuestionsFailure: (state, action: PayloadAction<IKeyedObject>) => {
       state.add.loading = false;
       state.add.error = action.payload;
     },
@@ -86,7 +90,7 @@ const questionSlice = createSlice({
       state.edit.loading = false;
       state.edit.data = action.payload;
     },
-    updateQuestionsFailure: (state, action: PayloadAction<any>) => {
+    updateQuestionsFailure: (state, action: PayloadAction<IKeyedObject>) => {
       state.edit.loading = false;
       state.edit.error = action.payload;
     },
@@ -98,7 +102,7 @@ const questionSlice = createSlice({
       state.get.loading = false;
       state.get.data = action.payload;
     },
-    getQuestionsFailure: (state, action: PayloadAction<any>) => {
+    getQuestionsFailure: (state, action: PayloadAction<IKeyedObject>) => {
       state.get.loading = false;
       state.get.error = action.payload;
     },
@@ -110,7 +114,7 @@ const questionSlice = createSlice({
       state.delete.loading = false;
       state.delete.data = action.payload;
     },
-    deleteQuestionsFailure: (state, action: PayloadAction<any>) => {
+    deleteQuestionsFailure: (state, action: PayloadAction<IKeyedObject>) => {
       state.delete.loading = false;
       state.delete.error = action.payload;
     },

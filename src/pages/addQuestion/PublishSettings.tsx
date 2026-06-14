@@ -1,18 +1,19 @@
 import {
+  FormControlLabel,
   Grid,
   Radio,
   RadioGroup,
-  FormControlLabel,
-  Typography,
   ToggleButton,
   ToggleButtonGroup,
+  Typography,
 } from '@mui/material';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
-import { PublishFormValues as IFormInput } from './model/publish.schema';
-import { Controller, useFormContext, useWatch } from 'react-hook-form';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { useEffect } from 'react';
+import { Controller, useFormContext, useWatch } from 'react-hook-form';
+
+import { PublishFormValues as IFormInput } from './model/publish.schema';
 
 export default function PublishSettings() {
   const { control, trigger } = useFormContext<IFormInput>();
@@ -178,51 +179,6 @@ export default function PublishSettings() {
         />
       </Grid>
 
-      {/* <Grid size={{ xs: 12, md: 6 }}>
-        <Controller
-          control={control}
-          name="endDate"
-          render={({ field }) => (
-            <TextField
-              fullWidth
-              type="date"
-              label="End Date"
-              disabled={liveUntil !== 'custom'}
-              slotProps={{
-                inputLabel: {
-                  shrink: true,
-                },
-              }}
-              error={!!errors.endDate}
-              helperText={errors.endDate?.message}
-              {...field}
-            />
-          )}
-        />
-      </Grid>
-
-      <Grid size={{ xs: 12, md: 6 }}>
-        <Controller
-          control={control}
-          name="endTime"
-          render={({ field }) => (
-            <TextField
-              fullWidth
-              type="time"
-              label="End Time"
-              disabled={liveUntil !== 'custom'}
-              slotProps={{
-                inputLabel: {
-                  shrink: true,
-                },
-              }}
-              error={!!errors.endTime}
-              helperText={errors.endTime?.message}
-              {...field}
-            />
-          )}
-        />
-      </Grid> */}
       <Grid size={12}>
         <Controller
           name="expiry_date"

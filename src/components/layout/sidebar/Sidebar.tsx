@@ -1,4 +1,5 @@
-import { NavLink, useLocation } from 'react-router-dom';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import DashboardIcon from '@mui/icons-material/Dashboard';
 import {
   Box,
   List,
@@ -6,9 +7,8 @@ import {
   ListItemIcon,
   ListItemText,
 } from '@mui/material';
+import { NavLink, useLocation } from 'react-router-dom';
 
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import AssignmentIcon from '@mui/icons-material/Assignment';
 import logo from '@/assets/logo.png';
 
 const menus = [

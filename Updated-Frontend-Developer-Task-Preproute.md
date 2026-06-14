@@ -1,6 +1,7 @@
 # Frontend Developer Task - Test Management Application
 
 ## Overview
+
 Build a test management application that allows users to create tests, add questions, and publish them. This is a 5-page flow application focusing on CRUD operations and API integration.
 
 ---
@@ -8,6 +9,7 @@ Build a test management application that allows users to create tests, add quest
 ## Application Flow
 
 ### Page 1: Login Page
+
 - Simple login form with userId and password fields
 - Form validation
 - JWT token management (store in localStorage/sessionStorage)
@@ -15,6 +17,7 @@ Build a test management application that allows users to create tests, add quest
 - Error handling for failed login attempts
 
 ### Page 2: Dashboard / Test List
+
 - Display all tests in a table/card layout
 - Show test details: name, subject, status, created date
 - Actions: Edit, View, Delete buttons
@@ -22,6 +25,7 @@ Build a test management application that allows users to create tests, add quest
 - Filter/search functionality (bonus)
 
 ### Page 3: Create/Edit Test Page
+
 - Form fields:
   - Test Name (required)
   - Subject (dropdown - fetched from API)
@@ -36,6 +40,7 @@ Build a test management application that allows users to create tests, add quest
 - Form validation
 
 ### Page 4: Add Questions Page
+
 - Display selected test details at top
 - Form to add questions:
   - Question text
@@ -51,6 +56,7 @@ Build a test management application that allows users to create tests, add quest
 - Minimum 1 question required
 
 ### Page 5: Preview & Publish
+
 - Display complete test overview:
   - Test details
   - All questions with options
@@ -62,20 +68,26 @@ Build a test management application that allows users to create tests, add quest
 ---
 
 ### Authentication
+
 All APIs except login require JWT token in header:
+
 ```
 Authorization: Bearer <token>
 ```
 
 ### 1. Login
+
 **POST** `/auth/login`
+
 ```json
 {
   "userId": "string",
   "password": "string"
 }
 ```
+
 **Response:**
+
 ```json
 {
   "success": true,
@@ -87,8 +99,10 @@ Authorization: Bearer <token>
 ```
 
 ### 2. Get All Subjects
+
 **GET** `/subjects`
 **Response:**
+
 ```json
 {
   "success": true,
@@ -102,8 +116,10 @@ Authorization: Bearer <token>
 ```
 
 ### 3. Get Topics by Subject
+
 **GET** `/topics/subject/:subjectId`
 **Response:**
+
 ```json
 {
   "success": true,
@@ -118,8 +134,10 @@ Authorization: Bearer <token>
 ```
 
 ### 4. Get Sub-topics by Topic
+
 **GET** `/sub-topics/topic/:topicId`
 **Response:**
+
 ```json
 {
   "success": true,
@@ -134,8 +152,10 @@ Authorization: Bearer <token>
 ```
 
 ### 5. Get All Tests
+
 **GET** `/tests`
 **Response:**
+
 ```json
 {
   "success": true,
@@ -153,7 +173,9 @@ Authorization: Bearer <token>
 ```
 
 ### 6. Create Test
+
 **POST** `/tests`
+
 ```json
 {
   "name": "Sample Test",
@@ -171,7 +193,9 @@ Authorization: Bearer <token>
   "status": null
 }
 ```
+
 **Response:**
+
 ```json
 {
   "success": true,
@@ -185,7 +209,9 @@ Authorization: Bearer <token>
 ```
 
 ### 7. Update Test
+
 **PUT** `/tests/:id`
+
 ```json
 {
   "name": "Updated Test Name",
@@ -196,8 +222,10 @@ Authorization: Bearer <token>
 ```
 
 ### 8. Get Test by ID
+
 **GET** `/tests/:id`
 **Response:**
+
 ```json
 {
   "success": true,
@@ -213,7 +241,9 @@ Authorization: Bearer <token>
 ```
 
 ### 9. Bulk Create Questions
+
 **POST** `/questions/bulk`
+
 ```json
 {
   "questions": [
@@ -232,7 +262,9 @@ Authorization: Bearer <token>
   ]
 }
 ```
+
 **Response:**
+
 ```json
 {
   "success": true,
@@ -247,26 +279,32 @@ Authorization: Bearer <token>
 ```
 
 ### 10. Publish Test
+
 **PUT** `/tests/:id`
+
 ```json
 {
   "status": "live"
 }
 ```
+
 ### 11. Sub Topic by Topic List
+
 POST `/sub-topics/multi-topics’
 ⁠ ```json
 {
-  "topicIds": [
-    "24f22e65-7117-4242-aa9b-2d55021e5b3d",
-    "24f22e65-7117-4242-aa9b-2d55021e5b3d"
-  ]
-```
+"topicIds": [
+"24f22e65-7117-4242-aa9b-2d55021e5b3d",
+"24f22e65-7117-4242-aa9b-2d55021e5b3d"
+]
+
+````
 ### 12. Fetch Bulk
 **POST** `/questions/fetchBulk`
 ```JSON
 {
 "question_ids": ["50162cb5-8e0c-4760-bf8f-a80f50751119", "6b3e7eac-c8d6-4226-8765-f2a1c50de1f3"]
 }
-```
+````
+
 Good luck! We're excited to see your work.

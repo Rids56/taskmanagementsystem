@@ -1,3 +1,4 @@
+import { IKeyedObject, TestList } from '../../pages/interfaceType';
 import axios from './axios';
 
 export const getTestListApi = async () => {
@@ -10,17 +11,17 @@ export const getTestByIdApi = async (id: string) => {
   return response.data;
 };
 
-export const createTestApi = async (payload: any) => {
+export const createTestApi = async (payload: TestList) => {
   const response = await axios.post(`/tests`, payload);
   return response.data;
 };
 
-export const updateTestApi = async (id: string, payload: any) => {
+export const updateTestApi = async (id: string, payload: TestList) => {
   const response = await axios.put(`/tests/${id}`, payload);
   return response.data;
 };
 
-export const deleteTestApi = async (id: string, payload: any) => {
+export const deleteTestApi = async (id: string, payload: IKeyedObject) => {
   const response = await axios.delete(`/tests/${id}`, payload);
   return response.data;
 };

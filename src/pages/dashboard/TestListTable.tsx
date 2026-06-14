@@ -1,4 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
+import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import {
   Alert,
   Box,
@@ -8,23 +10,21 @@ import {
   Snackbar,
   Tooltip,
 } from '@mui/material';
-import { useDispatch, useSelector } from 'react-redux';
-import { isEmpty } from 'lodash';
 import dayjs from 'dayjs';
-
-import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
-import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
-import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
-
+import { isEmpty } from 'lodash';
 import { MaterialReactTable, MRT_ColumnDef } from 'material-react-table';
+import { useEffect, useMemo, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { TestList } from '../interfaceType';
+
 import { RootState } from '@/src/store/store';
+
 import {
   deleteTestRequest,
   getTestListRequest,
   resetTestList,
 } from '../../store/slices/testListSlice';
+import { IKeyedObject, TestList } from '../interfaceType';
 import { tabMapping } from '../taskCreate/TestTypeTabs';
 
 export default function TestListTable() {
@@ -112,7 +112,7 @@ export default function TestListTable() {
       {
         accessorKey: 'total_time',
         header: 'Total Time',
-        Cell: ({ cell }: any) => `${cell.getValue()} min`,
+        Cell: ({ cell }: IKeyedObject) => `${cell.getValue()} min`,
       },
       {
         accessorKey: 'total_questions',
@@ -121,7 +121,7 @@ export default function TestListTable() {
       {
         accessorKey: 'status',
         header: 'Status',
-        Cell: ({ cell }: any) => {
+        Cell: ({ cell }: IKeyedObject) => {
           const status = cell.getValue();
 
           if (!status) return null;
@@ -154,7 +154,7 @@ export default function TestListTable() {
         size: 140,
         enableSorting: false,
         enableColumnFilter: false,
-        Cell: ({ row }: any) => (
+        Cell: ({ row }: IKeyedObject) => (
           <Box sx={{ display: 'flex', justifyContent: 'center' }}>
             <Tooltip title="View">
               <IconButton

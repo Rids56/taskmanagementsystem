@@ -1,3 +1,7 @@
+import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined';
+import AssessmentOutlinedIcon from '@mui/icons-material/AssessmentOutlined';
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
+import QuizOutlinedIcon from '@mui/icons-material/QuizOutlined';
 import {
   Box,
   Chip,
@@ -8,17 +12,14 @@ import {
   Typography,
 } from '@mui/material';
 import startCase from 'lodash/startCase';
-import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
-import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined';
-import QuizOutlinedIcon from '@mui/icons-material/QuizOutlined';
-import AssessmentOutlinedIcon from '@mui/icons-material/AssessmentOutlined';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { TopicOption } from '../interfaceType';
+
 import IconChapter from '../../assets/ar_stickers.png';
 import IconLevel from '../../assets/cognition.png';
+import { IKeyedObject, TopicOption } from '../interfaceType';
 
 interface TestInfoCardProps {
-  rowData: any;
+  rowData: IKeyedObject;
 }
 
 export default function TestInfoCard({ rowData }: TestInfoCardProps) {

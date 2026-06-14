@@ -1,12 +1,18 @@
-import { FieldValues, DeepPartial, FieldPath } from 'react-hook-form';
+import { DeepPartial, FieldPath, FieldValues } from 'react-hook-form';
+
+import { IKeyedObject } from '../pages/interfaceType';
 
 export function getDirtyValues<T extends FieldValues>(
   data: T,
-  dirtyFields: DeepPartial<Record<FieldPath<T>, any>>
+  dirtyFields: DeepPartial<Record<FieldPath<T>, IKeyedObject>>
 ): Partial<T> {
-  const output: any = {};
+  const output: IKeyedObject = {};
 
-  const process = (dataNode: any, dirtyNode: any, path: string[] = []) => {
+  const process = (
+    dataNode: IKeyedObject,
+    dirtyNode: IKeyedObject,
+    path: string[] = []
+  ) => {
     if (!dirtyNode) return;
 
     Object.keys(dirtyNode).forEach((key) => {
@@ -28,10 +34,10 @@ export function getDirtyValues<T extends FieldValues>(
 
   process(data, dirtyFields);
 
-  return output;
+  return output as Partial<T>;
 }
 
-function setValue(obj: any, path: string[], value: any) {
+function setValue(obj: IKeyedObject, path: string[], value: IKeyedObject) {
   let current = obj;
 
   path.forEach((key, index) => {
@@ -44,6 +50,6 @@ function setValue(obj: any, path: string[], value: any) {
   });
 }
 
-function isObject(val: any) {
+function isObject(val: IKeyedObject) {
   return val && typeof val === 'object' && !Array.isArray(val);
 }

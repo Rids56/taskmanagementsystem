@@ -1,25 +1,26 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
+  Alert,
   Box,
   Button,
   Card,
   CardContent,
+  Grid,
   Link,
   Stack,
   TextField,
   Typography,
-  Alert,
-  Grid,
 } from '@mui/material';
-import { useAppDispatch } from '../../hooks';
-import logo from '../../assets/logo.png';
+import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
+
 import frame from '../../assets/frame.png';
-import { LoginFormValues, loginSchema } from './model/schema';
+import logo from '../../assets/logo.png';
+import { useAppDispatch } from '../../hooks';
 import { loginApi } from '../../store/api/authApi';
 import { setCredentials } from '../../store/slices/authSlice';
+import { LoginFormValues, loginSchema } from './model/schema';
 
 const Login: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -55,6 +56,8 @@ const Login: React.FC = () => {
       setErrorMessage(
         'Invalid credentials. Please try admin/password for demo access.'
       );
+
+      if (error) throw error;
     }
   };
 
