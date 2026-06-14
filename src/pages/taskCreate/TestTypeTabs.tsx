@@ -1,5 +1,5 @@
 import { Box, Tab, Tabs } from '@mui/material';
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, useWatch } from 'react-hook-form';
 
 import { TaskCreateFormValues as IFormInput } from './model/create.schema';
 
@@ -19,14 +19,11 @@ export const tabMapping = [
 ];
 
 export default function TestTypeTabs() {
-  const { watch, setValue } = useFormContext<IFormInput>();
+  const { setValue, control } = useFormContext<IFormInput>();
 
-  // const tabMapping = ['chapterwise', 'pyq', 'mock'];
-
-  const testType = watch('type');
-
+  const testType = useWatch({ control, name: 'type' });
   const tabValue = Math.max(
-    tabMapping.findIndex((tab) => tab.value === testType),
+    tabMapping.findIndex((tab) => tab.value == testType),
     0
   );
 

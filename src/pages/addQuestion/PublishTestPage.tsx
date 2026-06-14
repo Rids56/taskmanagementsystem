@@ -3,7 +3,7 @@ import { Alert, Box, Button, Container, Grid, Snackbar } from '@mui/material';
 import dayjs from 'dayjs';
 import { isEmpty } from 'lodash';
 import { useEffect, useRef, useState } from 'react';
-import { FormProvider, useForm } from 'react-hook-form';
+import { FormProvider, useForm, useWatch } from 'react-hook-form';
 import { useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -46,22 +46,24 @@ const PublishTestPage = ({ rowData, onCancel }: PublishTestPageProps) => {
     reValidateMode: 'onChange',
     defaultValues: {
       publishMode: 'now',
-      // publishDate: '',
-      // publishTime: '',
       scheduled_date: null,
       liveUntil: 'custom',
-      // endDate: '',
-      // endTime: '',
       expiry_date: null,
     },
   });
 
   const {
-    watch,
     reset,
     handleSubmit,
+    trigger,
+    control,
     formState: { dirtyFields },
   } = formContext;
+
+  const currentPublishMode = useWatch({
+    control,
+    name: 'publishMode',
+  });
 
   // selector
   const {
@@ -86,6 +88,7 @@ const PublishTestPage = ({ rowData, onCancel }: PublishTestPageProps) => {
 
       liveUntil: rowData.expiry_date ? 'custom' : 'always',
     });
+    trigger();
 
     initializedRef.current = true;
   }, [rowData, reset]);
@@ -168,9 +171,7 @@ const PublishTestPage = ({ rowData, onCancel }: PublishTestPageProps) => {
               </Button>
 
               <Button variant="contained" type="submit" disabled={isViewMode}>
-                {watch('publishMode') === 'now'
-                  ? 'Publish Now'
-                  : 'Schedule Test'}
+                {currentPublishMode === 'now' ? 'Publish Now' : 'Schedule Test'}
               </Button>
             </Box>
           </Grid>
