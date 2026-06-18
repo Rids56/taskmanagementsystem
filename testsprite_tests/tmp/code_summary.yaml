@@ -1,0 +1,112 @@
+version: "2"
+type: frontend
+tech_stack:
+  - TypeScript
+  - React 19
+  - Vite
+  - Redux Toolkit
+  - Redux Saga
+  - React Router v7
+  - Material UI
+  - React Hook Form
+  - Zod
+  - Axios
+  - Material React Table
+routes:
+  - path: /
+    file: src/routes/router.tsx
+    auth_required: false
+    description: Redirects to dashboard when authenticated
+  - path: /login
+    file: src/pages/login/Login.tsx
+    auth_required: false
+    description: User authentication page with userId and password fields
+  - path: /dashboard
+    file: src/pages/dashboard/Dashboard.tsx
+    auth_required: true
+    description: Test list dashboard with create, edit, view, and delete actions
+  - path: /task-create
+    file: src/pages/taskCreate/TaskCreate.tsx
+    auth_required: true
+    description: Create or edit test configuration
+  - path: /task-create/add-question
+    file: src/pages/addQuestion/AddQuestion.tsx
+    auth_required: true
+    description: Add MCQ questions, import CSV, and publish test
+  - path: "*"
+    file: src/pages/NotFound.tsx
+    auth_required: false
+    description: 404 not found page
+features:
+  - name: User Login
+    description: Authenticate with userId and password; JWT stored in localStorage
+    files:
+      - src/pages/login/Login.tsx
+      - src/store/api/authApi.ts
+    entry_route: /login
+    user_interactions:
+      - Fill User ID input field
+      - Fill Password input field
+      - Click Login button to submit
+      - See error alert on invalid credentials
+      - Redirect to dashboard on successful login
+    api_calls:
+      - method: POST
+        endpoint: /auth/login
+    auth_required: false
+  - name: Dashboard Test List
+    description: View all tests in a sortable table with CRUD actions
+    files:
+      - src/pages/dashboard/Dashboard.tsx
+      - src/pages/dashboard/TestListTable.tsx
+    entry_route: /dashboard
+    user_interactions:
+      - View test list table
+      - Click Create New Test button
+      - Edit, view, or delete existing tests
+    api_calls:
+      - method: GET
+        endpoint: /tests
+      - method: DELETE
+        endpoint: /tests/:id
+    auth_required: true
+  - name: Create and Edit Test
+    description: Configure test metadata, marking scheme, and duration
+    files:
+      - src/pages/taskCreate/TaskCreate.tsx
+    entry_route: /task-create
+    user_interactions:
+      - Enter test name and select subject, topics, sub-topics
+      - Set marking scheme and duration
+      - Save as draft or proceed to add questions
+    api_calls:
+      - method: GET
+        endpoint: /subjects
+      - method: POST
+        endpoint: /tests
+      - method: PUT
+        endpoint: /tests/:id
+    auth_required: true
+  - name: Add Questions and Publish Test
+    description: Add MCQ questions and publish test
+    files:
+      - src/pages/addQuestion/AddQuestion.tsx
+      - src/pages/addQuestion/PublishTestPage.tsx
+    entry_route: /task-create/add-question
+    user_interactions:
+      - Add question with options and explanation
+      - Upload CSV to bulk import
+      - Preview and publish test
+    api_calls:
+      - method: POST
+        endpoint: /questions/bulk
+      - method: PUT
+        endpoint: /tests/:id
+    auth_required: true
+known_limitations:
+  - issue: App uses basename /taskmanagementsystem/ for deployment
+    location: vite.config.ts
+    impact: Tests must navigate with full base path
+  - issue: API CORS only allows localhost:3000 origin
+    location: .env
+    impact: App must run on port 3000 for API calls to succeed

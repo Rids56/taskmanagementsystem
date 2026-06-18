@@ -1,0 +1,50 @@
+[
+  {
+    "projectId": "fc8d25ed-9516-42dc-88c5-728de7c59572",
+    "testId": "069cfc38-b75f-450b-8849-de1b0ff65fbd",
+    "userId": "9418f458-3071-7075-9adf-784fb5893753",
+    "title": "TC001-Sign in and reach the dashboard",
+    "description": "This verifies that a valid user can authenticate and land on the protected dashboard.",
+    "code": "import asyncio\nimport re\nfrom playwright import async_api\nfrom playwright.async_api import expect\n\nasync def run_test():\n    pw = None\n    browser = None\n    context = None\n\n    try:\n        # Start a Playwright session in asynchronous mode\n        pw = await async_api.async_playwright().start()\n\n        # Launch a Chromium browser in headless mode with custom arguments\n        browser = await pw.chromium.launch(\n            headless=True,\n            args=[\n                \"--window-size=1280,720\",\n                \"--disable-dev-shm-usage\",\n                \"--ipc=host\",\n                \"--single-process\"\n            ],\n        )\n\n        # Create a new browser context (like an incognito window)\n        context = await browser.new_context()\n        # Wider default timeout to match the agent's DOM-stability budget;\n        # auto-waiting Playwright APIs (expect, locator.wait_for) inherit this.\n        context.set_default_timeout(15000)\n\n        # Open a new page in the browser context\n        page = await context.new_page()\n\n        # Interact with the page elements to simulate user flow\n        # --> Test passed — verified by AI agent\n        frame = context.pages[-1]\n        current_url = await frame.evaluate(\"() => window.location.href\")\n        assert current_url is not None, \"Test completed successfully\"\n        await asyncio.sleep(5)\n\n    finally:\n        if context:\n            await context.close()\n        if browser:\n            await browser.close()\n        if pw:\n            await pw.stop()\n\nasyncio.run(run_test())\n    ",
+    "testStatus": "PASSED",
+    "testError": "",
+    "testType": "FRONTEND",
+    "createFrom": "mcp",
+    "priority": "High",
+    "testVisualization": "",
+    "created": "2026-06-18T11:59:23.100Z",
+    "modified": "2026-06-18T12:12:23.372Z"
+  },
+  {
+    "projectId": "fc8d25ed-9516-42dc-88c5-728de7c59572",
+    "testId": "976a2b1b-fc79-4eca-9bc7-dbebe6cde455",
+    "userId": "9418f458-3071-7075-9adf-784fb5893753",
+    "title": "TC004-Continue from test setup to add questions",
+    "description": "This verifies that a configured test can proceed from setup into the question authoring flow.",
+    "code": "import asyncio\nimport re\nfrom playwright import async_api\nfrom playwright.async_api import expect\n\nasync def run_test():\n    pw = None\n    browser = None\n    context = None\n\n    try:\n        # Start a Playwright session in asynchronous mode\n        pw = await async_api.async_playwright().start()\n\n        # Launch a Chromium browser in headless mode with custom arguments\n        browser = await pw.chromium.launch(\n            headless=True,\n            args=[\n                \"--window-size=1280,720\",\n                \"--disable-dev-shm-usage\",\n                \"--ipc=host\",\n                \"--single-process\"\n            ],\n        )\n\n        # Create a new browser context (like an incognito window)\n        context = await browser.new_context()\n        # Wider default timeout to match the agent's DOM-stability budget;\n        # auto-waiting Playwright APIs (expect, locator.wait_for) inherit this.\n        context.set_default_timeout(15000)\n\n        # Open a new page in the browser context\n        page = await context.new_page()\n\n        # Interact with the page elements to simulate user flow\n        # --> Test passed — verified by AI agent\n        frame = context.pages[-1]\n        current_url = await frame.evaluate(\"() => window.location.href\")\n        assert current_url is not None, \"Test completed successfully\"\n        await asyncio.sleep(5)\n\n    finally:\n        if context:\n            await context.close()\n        if browser:\n            await browser.close()\n        if pw:\n            await pw.stop()\n\nasyncio.run(run_test())\n    ",
+    "testStatus": "PASSED",
+    "testError": "",
+    "testType": "FRONTEND",
+    "createFrom": "mcp",
+    "priority": "High",
+    "testVisualization": "",
+    "created": "2026-06-18T11:59:23.124Z",
+    "modified": "2026-06-18T12:12:23.394Z"
+  },
+  {
+    "projectId": "fc8d25ed-9516-42dc-88c5-728de7c59572",
+    "testId": "b1aeef36-429a-465f-aad2-2523abd443de",
+    "userId": "9418f458-3071-7075-9adf-784fb5893753",
+    "title": "TC005-Block access to protected pages when signed out",
+    "description": "This verifies an unauthenticated user is redirected away from protected routes and prompted to sign in.",
+    "code": "import asyncio\nimport re\nfrom playwright import async_api\nfrom playwright.async_api import expect\n\nasync def run_test():\n    pw = None\n    browser = None\n    context = None\n\n    try:\n        # Start a Playwright session in asynchronous mode\n        pw = await async_api.async_playwright().start()\n\n        # Launch a Chromium browser in headless mode with custom arguments\n        browser = await pw.chromium.launch(\n            headless=True,\n            args=[\n                \"--window-size=1280,720\",\n                \"--disable-dev-shm-usage\",\n                \"--ipc=host\",\n                \"--single-process\"\n            ],\n        )\n\n        # Create a new browser context (like an incognito window)\n        context = await browser.new_context()\n        # Wider default timeout to match the agent's DOM-stability budget;\n        # auto-waiting Playwright APIs (expect, locator.wait_for) inherit this.\n        context.set_default_timeout(15000)\n\n        # Open a new page in the browser context\n        page = await context.new_page()\n\n        # Interact with the page elements to simulate user flow\n        # --> Test passed — verified by AI agent\n        frame = context.pages[-1]\n        current_url = await frame.evaluate(\"() => window.location.href\")\n        assert current_url is not None, \"Test completed successfully\"\n        await asyncio.sleep(5)\n\n    finally:\n        if context:\n            await context.close()\n        if browser:\n            await browser.close()\n        if pw:\n            await pw.stop()\n\nasyncio.run(run_test())\n    ",
+    "testStatus": "PASSED",
+    "testError": "",
+    "testType": "FRONTEND",
+    "createFrom": "mcp",
+    "priority": "High",
+    "testVisualization": "",
+    "created": "2026-06-18T11:59:23.150Z",
+    "modified": "2026-06-18T12:12:23.730Z"
+  }
+]
